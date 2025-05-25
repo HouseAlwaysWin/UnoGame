@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://dxobqmv5p3elk"]
+
+[ext_resource type="Script" uid="uid://bhsixk7jaxc6o" path="res://Scripts/GameManager.cs" id="1_bo1nx"]
+[ext_resource type="PackedScene" uid="uid://cde14fbowjau4" path="res://Scenes/card.tscn" id="1_jjgbg"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_bo1nx")
+
+[node name="Card" parent="." instance=ExtResource("1_jjgbg")]
+position = Vector2(204, 272)
