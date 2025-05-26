@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using GodotHelper;
 
 public enum CardColor { Red, Blue, Green, Yellow, Wild }
 public enum CardType { Number, Skip, Reverse, DrawTwo, Wild, WildDrawFour }
@@ -18,15 +19,17 @@ public partial class Card : Node2D
 
     public override void _Ready()
     {
-        CardImage = GetNode<Sprite2D>("CardImage");
+        // DebugHelper.WaitForDebugger();
         InitCard();
     }
 
     private void InitCard()
     {
+        CardImage = GetNode<Sprite2D>("CardImage");
+        var cardImgName = string.IsNullOrEmpty(CardImgName)? "deck" : CardImgName;
         if (CardImage != null)
         {
-            CardImage.Texture = GD.Load<Texture2D>($"res://Assets/Cards/{CardImgName}.png");
+            CardImage.Texture = GD.Load<Texture2D>($"res://Assets/Cards/{cardImgName}.png");
             Vector2 textureSize = CardImage.Texture.GetSize();
             CardImage.Scale = new Vector2(
                 CardSize.X / textureSize.X,
@@ -34,15 +37,17 @@ public partial class Card : Node2D
             );
         }
     }
-    
-    public static Card CreateCard(string cardImgName,CardColor cardColor,CardType cardType)
+
+    public void SetUpCardInfo(string cardImgName,CardColor cardColor,CardType cardType )
     {
-        var cardScence = GD.Load<PackedScene>("res://Scenes/card.tscn");
-        var newCard = cardScence.Instantiate<Card>();
-        newCard.CardImgName = cardImgName;
-        newCard.CardColor = cardColor;
-        newCard.CardType = cardType;
-        return newCard;
+        if (CardImage != null)
+        {
+            CardImage.Texture = GD.Load<Texture2D>($"res://Assets/Cards/{cardImgName}.png");
+            CardColor = cardColor;
+            CardType = cardType;
+        }
     }
+    
+
   
 }

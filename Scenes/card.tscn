@@ -1,12 +1,33 @@
-[gd_scene load_steps=3 format=3 uid="uid://cde14fbowjau4"]
+[gd_scene load_steps=4 format=3 uid="uid://cde14fbowjau4"]
 
 [ext_resource type="Script" uid="uid://bh4luesglka0y" path="res://Scripts/Card.cs" id="1_0qqmn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0qqmn"]
+bg_color = Color(0.359069, 0.359069, 0.359069, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_gmcdd"]
 size = Vector2(100, 150)
 
 [node name="Card" type="Node2D"]
 script = ExtResource("1_0qqmn")
+
+[node name="Panel" type="Panel" parent="."]
+clip_contents = true
+custom_minimum_size = Vector2(102, 152)
+offset_left = -50.0
+offset_top = -75.0
+offset_right = 48.0
+offset_bottom = 73.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_0qqmn")
 
 [node name="CardImage" type="Sprite2D" parent="."]
 texture = SubResource("PlaceholderTexture2D_gmcdd")
