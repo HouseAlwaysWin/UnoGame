@@ -6,4 +6,13 @@
 script = ExtResource("1_bo1nx")
 
 [node name="DeckPile" type="Node2D" parent="."]
-position = Vector2(576, 357)
+position = Vector2(636, 336)
+
+[node name="PlayerHand" type="Node2D" parent="."]
+position = Vector2(580, 519)
+
+[node name="PlayButton" type="Button" parent="."]
+offset_right = 8.0
+offset_bottom = 8.0
+theme_override_font_sizes/font_size = 30
+text = "發牌"

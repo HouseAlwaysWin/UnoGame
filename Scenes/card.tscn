@@ -9,16 +9,18 @@ border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_gmcdd"]
 size = Vector2(100, 150)
 
-[node name="Card" type="Node2D"]
+[node name="Card" type="Node2D" node_paths=PackedStringArray("CardImage")]
 script = ExtResource("1_0qqmn")
+CardColor = 4
+CardImage = NodePath("CardImage")
 
 [node name="Panel" type="Panel" parent="."]
 clip_contents = true

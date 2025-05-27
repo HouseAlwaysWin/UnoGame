@@ -1,20 +1,35 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using GodotHelper;
 
 public partial class GameManager : Node
 {
     public List<Card> _deck = new();
     private Node2D _deckPileNode;
-    public override void _Ready()
+    private Node2D _playerHand;
+    private Button _playButton;
+    public override async void _Ready()
     {
         // DebugHelper.WaitForDebugger();
 
         _deckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
+        _playerHand = GetNode<Node2D>("PlayerHand");
+        _playButton = GetNode<Button>("PlayButton");
+        _playButton.Pressed += onPlayButtonPressed;
         InitDeck();
         DisplayDeckPile();
+        // DisplayDeckPileWithRotation(_deckPileNode);
+        // DealInitialCards();
+        ShuffleDeck();
     }
+
+    private async void onPlayButtonPressed()
+    {
+        await DealInitialCardsAsync();
+    }
+
 
     private void InitDeck()
     {
@@ -51,7 +66,7 @@ public partial class GameManager : Node
     private void DisplayDeckPile()
     {
         const int MaxStackSize = 10;
-        const float OffsetStep = 2.5f;
+        const float OffsetStep = 3f;
         const float RotationStep = 0.5f;
     
         int count = Math.Min(_deck.Count, MaxStackSize);
@@ -67,11 +82,26 @@ public partial class GameManager : Node
         }
     }
     
+    private void DisplayDeckPileWithRotation(Node2D parent, int count = 10)
+    {
+        const float radius = 10f;
+        const float angleStep = 10f; // 每張牌角度間隔（degrees）
+
+        for (int i = 0; i < count; i++)
+        {
+            var visualCard = CreateCard("deck",CardColor.Wild, CardType.Wild);
+            visualCard.Position = Vector2.Zero;
+            visualCard.RotationDegrees = -angleStep * (count / 2f) + i * angleStep; // -25 ~ +25
+            visualCard.ZIndex = i;
+            parent.AddChild(visualCard);
+        }
+    }
+    
     private  Card CreateCard(string cardImgName,CardColor cardColor,CardType cardType)
     {
         var cardScence = GD.Load<PackedScene>("res://Scenes/card.tscn");
         var newCard = cardScence.Instantiate<Card>();
-        newCard.SetUpCardInfo(cardImgName, cardColor, cardType);
+        newCard.InstantiateCard(cardImgName, cardColor, cardType);
         return newCard;
     }
 
@@ -82,6 +112,46 @@ public partial class GameManager : Node
         {
             int j = random.Next(i + 1);
             (_deck[i], _deck[j]) = (_deck[j], _deck[i]);
+        }
+    }
+    
+    private void DealInitialCards()
+    {
+        const int cardsToDeal = 5;
+        const float spacing = 110f;
+        float startX = -((cardsToDeal - 1) * spacing / 2f);
+
+        for (int i = 0; i < cardsToDeal; i++)
+        {
+            Card card = _deck[0];
+            _deck.RemoveAt(0);
+            card.Position = new Vector2(startX + i * spacing, 0);
+            _playerHand.AddChild(card);
+        }
+    }
+    
+    private async Task DealInitialCardsAsync()
+    {
+        const int cardsToDeal = 5;
+        const float spacing = 110f;
+        float startX = -((cardsToDeal - 1) * spacing / 2f);
+
+        for (int i = 0; i < cardsToDeal; i++)
+        {
+            Card card = _deck[0];
+            _deck.RemoveAt(0);
+            GD.Print(card.CardImage.Texture.ResourcePath);
+            card.Position = _deckPileNode.GlobalPosition;
+            AddChild(card);
+
+            Vector2 targetPos = _playerHand.GlobalPosition + new Vector2(startX + i * spacing, 0);
+
+            var tween = CreateTween();
+            tween.TweenProperty(card, "global_position", targetPos, 0.4).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+            await ToSignal(tween, "finished");
+
+            // _playerHand.AddChild(card);
+             // var pos = card.ToLocal(targetPos);
         }
     }
     

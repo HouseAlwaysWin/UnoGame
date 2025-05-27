@@ -28,7 +28,7 @@ namespace GodotHelper
             if (Debugger.IsAttached)
             {
                 GD.Print("[DebugHelper] Debugger attached—breaking now.");
-                Debugger.Break();
+                // Debugger.Break();
             }
             else
             {
