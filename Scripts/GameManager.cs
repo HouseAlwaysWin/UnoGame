@@ -6,12 +6,15 @@ using GodotHelper;
 
 public partial class GameManager : Node
 {
+    [Export] public float CardSpacing = 50;
+
     public List<Card> _deck = new();
     private Node2D _deckPileNode;
     private Player _playerHand;
     private Button _playButton;
     private Area2D _dropZone;
     private Node2D _dropZonePileNode;
+
 
     public override async void _Ready()
     {
@@ -29,6 +32,18 @@ public partial class GameManager : Node
         // DealInitialCards();
         ShuffleDeck();
         await DealInitialCardsAsync();
+        InitComPlayerHand(3);
+    }
+
+    public void InitComPlayerHand(int playerNumber)
+    {
+        for (int i = 0; i < playerNumber; i++)
+        {
+            var playerScence = GD.Load<PackedScene>("res://Scenes/player.tscn");
+            var newPlayer = playerScence.Instantiate<Player>();
+            newPlayer.Name = $"COM Player {i + 1}";
+            AddChild(newPlayer);
+        }
     }
 
     private async void onPlayButtonPressed()
@@ -57,20 +72,20 @@ public partial class GameManager : Node
             string skipName = $"{color.ToString().ToLower()}Skip";
             string drawTwoName = $"{color.ToString().ToLower()}DrawTwo";
 
-            _deck.Add(CreateCard(reverseName, color, CardType.Reverse, -2));
-            _deck.Add(CreateCard(reverseName, color, CardType.Reverse, -2));
-            _deck.Add(CreateCard(skipName, color, CardType.Skip, -3));
-            _deck.Add(CreateCard(skipName, color, CardType.Skip, -3));
-            _deck.Add(CreateCard(drawTwoName, color, CardType.DrawTwo, -4));
-            _deck.Add(CreateCard(drawTwoName, color, CardType.DrawTwo, -4));
+            _deck.Add(CreateCard(reverseName, color, CardType.Reverse, 10));
+            _deck.Add(CreateCard(reverseName, color, CardType.Reverse, 10));
+            _deck.Add(CreateCard(skipName, color, CardType.Skip, 11));
+            _deck.Add(CreateCard(skipName, color, CardType.Skip, 11));
+            _deck.Add(CreateCard(drawTwoName, color, CardType.DrawTwo, 12));
+            _deck.Add(CreateCard(drawTwoName, color, CardType.DrawTwo, 12));
         }
 
         for (int i = 0; i < 4; i++)
         {
             string wildName = $"{nameof(CardType.Wild).ToLower()}";
             string wildDrawFourName = $"{nameof(CardType.WildDrawFour).ToLower()}";
-            _deck.Add(CreateCard(wildName, CardColor.Wild, CardType.Wild));
-            _deck.Add(CreateCard(wildDrawFourName, CardColor.Wild, CardType.WildDrawFour));
+            _deck.Add(CreateCard(wildName, CardColor.Wild, CardType.Wild, 13));
+            _deck.Add(CreateCard(wildDrawFourName, CardColor.Wild, CardType.WildDrawFour, 14));
         }
     }
 
@@ -114,6 +129,7 @@ public partial class GameManager : Node
         var cardScence = GD.Load<PackedScene>("res://Scenes/card.tscn");
         var newCard = cardScence.Instantiate<Card>();
         newCard.InstantiateCard(_playerHand, cardImgName, cardColor, cardType, _dropZonePileNode.GetPath(), cardNumber);
+        newCard.Name = $"{cardColor}{cardType}{cardNumber}";
         return newCard;
     }
 
@@ -127,25 +143,10 @@ public partial class GameManager : Node
         }
     }
 
-    private void DealInitialCards()
-    {
-        const int cardsToDeal = 5;
-        const float spacing = 110f;
-        float startX = -((cardsToDeal - 1) * spacing / 2f);
-
-        for (int i = 0; i < cardsToDeal; i++)
-        {
-            Card card = _deck[0];
-            _deck.RemoveAt(0);
-            card.Position = new Vector2(startX + i * spacing, 0);
-            _playerHand.AddChild(card);
-        }
-    }
-
     private async Task DealInitialCardsAsync()
     {
         int cardsToDeal = 7;
-        const float spacing = 110f;
+        float spacing = CardSpacing;
         float startX = -((cardsToDeal - 1) * spacing / 2f);
         if (_deck.Count < 5) cardsToDeal = _deck.Count;
 

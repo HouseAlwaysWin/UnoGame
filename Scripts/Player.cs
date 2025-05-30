@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 public partial class Player : Node2D
 {
     [Export] public string PlayerId;
+    private GameManager _gameManager;
 
     public override void _Ready()
     {
+        _gameManager = GetParent<GameManager>();
     }
 
     public void AddCard(Card card)
@@ -34,7 +36,7 @@ public partial class Player : Node2D
         }
 
         int cardsToDeal = cards.Count;
-        float spacing = 110f;
+        float spacing = _gameManager.CardSpacing;
         float startX = -((cardsToDeal - 1) * spacing / 2f);
 
         for (int i = 0; i < cardsToDeal; i++)

@@ -6,6 +6,7 @@
 
 [node name="Main" type="Node"]
 script = ExtResource("1_bo1nx")
+CardSpacing = 40.0
 
 [node name="PlayerHand" parent="." instance=ExtResource("2_8gbba")]
 position = Vector2(569, 501)
