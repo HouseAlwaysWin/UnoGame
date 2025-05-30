@@ -10,6 +10,7 @@ public partial class GameManager : Node
     private Node2D _deckPileNode;
     private Node2D _playerHand;
     private Button _playButton;
+    private Area2D _dropZone;
 
     public override async void _Ready()
     {
@@ -19,11 +20,13 @@ public partial class GameManager : Node
         _playerHand = GetNode<Node2D>("PlayerHand");
         _playButton = GetNode<Button>("PlayButton");
         _playButton.Pressed += onPlayButtonPressed;
+        _dropZone = GetNode<Area2D>("DropZone");
         InitDeck();
         DisplayDeckPile();
         // DisplayDeckPileWithRotation(_deckPileNode);
         // DealInitialCards();
         ShuffleDeck();
+        await DealInitialCardsAsync();
     }
 
     private async void onPlayButtonPressed()
@@ -108,7 +111,7 @@ public partial class GameManager : Node
     {
         var cardScence = GD.Load<PackedScene>("res://Scenes/card.tscn");
         var newCard = cardScence.Instantiate<Card>();
-        newCard.InstantiateCard(cardImgName, cardColor, cardType);
+        newCard.InstantiateCard(cardImgName, cardColor, cardType, _dropZone.GetPath());
         return newCard;
     }
 
@@ -140,7 +143,7 @@ public partial class GameManager : Node
     private async Task DealInitialCardsAsync()
     {
         int cardsToDeal = 7;
-        const float spacing = 100f;
+        const float spacing = 110f;
         float startX = -((cardsToDeal - 1) * spacing / 2f);
         if (_deck.Count < 5) cardsToDeal = _deck.Count;
 
@@ -150,17 +153,20 @@ public partial class GameManager : Node
             {
                 Card card = _deck[0];
                 _deck.RemoveAt(0);
+
+                // Card visualCard = CreateCard($"deck", CardColor.Wild, CardType.Wild); // 顯示用，不影響資料堆
                 // GD.Print(card.CardImage.Texture.ResourcePath);
                 card.Position = _deckPileNode.GlobalPosition;
                 AddChild(card);
 
                 Vector2 targetPos = _playerHand.GlobalPosition + new Vector2(startX + i * spacing, 0);
-
+                card.SetAlwaysOnTop();
                 var tween = CreateTween();
                 tween.TweenProperty(card, "global_position", targetPos, 0.5).SetTrans(Tween.TransitionType.Sine)
                     .SetEase(Tween.EaseType.Out);
                 await ToSignal(tween, "finished");
 
+                // 紀錄目前位置
                 card.OriginalPosition = card.Position;
 
                 // _playerHand.AddChild(card);

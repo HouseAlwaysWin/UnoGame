@@ -1,12 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://dxobqmv5p3elk"]
+[gd_scene load_steps=3 format=3 uid="uid://dxobqmv5p3elk"]
 
 [ext_resource type="Script" uid="uid://bhsixk7jaxc6o" path="res://Scripts/GameManager.cs" id="1_bo1nx"]
+[ext_resource type="PackedScene" uid="uid://c86x7vo8htqv7" path="res://Scenes/drop_zone.tscn" id="2_bo1nx"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_bo1nx")
 
 [node name="DeckPile" type="Node2D" parent="."]
-position = Vector2(636, 336)
+position = Vector2(162, 140)
 
 [node name="PlayerHand" type="Node2D" parent="."]
 position = Vector2(580, 519)
@@ -16,3 +17,7 @@ offset_right = 8.0
 offset_bottom = 8.0
 theme_override_font_sizes/font_size = 30
 text = "發牌"
+
+[node name="DropZone" parent="." instance=ExtResource("2_bo1nx")]
+position = Vector2(591, 295)
+rotation = 1.5708
