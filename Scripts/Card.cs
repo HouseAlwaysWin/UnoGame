@@ -34,6 +34,7 @@ public partial class Card : Area2D
     [Export] public int Number = -1;
     [Export] public bool IsInDeck = false;
 
+    public Player PlayerHand;
     public Vector2 OriginalPosition;
     public string DropZonePath;
     public bool IsSelected = false;
@@ -44,6 +45,7 @@ public partial class Card : Area2D
     private bool _isDragging = false;
     private Vector2 _dragOffset;
     private Area2D _dropZone;
+    private Node2D _dropZoneNode;
     private string CardImgName;
     private static int _globalZCounter = 1000;
 
@@ -57,9 +59,11 @@ public partial class Card : Area2D
             MouseExited += OnMouseExited;
         }
 
+
         if (!string.IsNullOrWhiteSpace(DropZonePath))
         {
-            _dropZone = (Area2D)GetNode(DropZonePath);
+            _dropZoneNode = GetNode<Node2D>(DropZonePath);
+            _dropZone = _dropZoneNode.GetNode<Area2D>("Area2D");
         }
     }
 
@@ -87,7 +91,7 @@ public partial class Card : Area2D
 
     private void OnMouseEntered()
     {
-        if (IsInDeck) return;
+        if (IsInDeck || !IsTopZIndexUnderMouse()) return;
         _hoverTween = CreateTween();
         _hoverTween.SetLoops();
         _hoverTween.TweenProperty(this, "rotation_degrees", 2f, 0.1).SetTrans(Tween.TransitionType.Sine)
@@ -152,6 +156,7 @@ public partial class Card : Area2D
                 }
             }
         }
+
         // 最後回傳：如果滑鼠下最高 ZIndex 的卡片是我自己，才允許拖曳
         return topCard == this;
     }
@@ -162,17 +167,6 @@ public partial class Card : Area2D
         ZAsRelative = false; // 確保 ZIndex 是全局有效的
         OriginalZIndex = ZIndex;
         ZIndex = _globalZCounter++;
-        RaiseToTop();
-    }
-
-    public void RaiseToTop()
-    {
-        var parent = GetParent();
-        if (parent != null)
-        {
-            parent.RemoveChild(this);
-            parent.AddChild(this); // 加回去會成為場景樹中最後一個 → 最上層
-        }
     }
 
     public void ReturnToOriginalZ()
@@ -180,7 +174,7 @@ public partial class Card : Area2D
         ZIndex = OriginalZIndex;
     }
 
-    private void HandleDrop()
+    private async void HandleDrop()
     {
         if (_dropZone != null)
         {
@@ -196,8 +190,15 @@ public partial class Card : Area2D
                 if (dropZoneRect.HasPoint(GlobalPosition))
                 {
                     IsInDeck = true;
-                    Position = dropZonePos;
                     KillShakeTween();
+                    
+                     
+                    // Vector2 globalPos = dropZonePos;
+                    PlayerHand.RemoveCard(this);
+                    _dropZoneNode.AddChild(this);
+                    Position = _dropZoneNode.ToLocal(dropZonePos);
+                    await PlayerHand.ReorderHand();
+
                     GD.Print("Card dropped in valid zone");
                     return;
                 }
@@ -208,7 +209,7 @@ public partial class Card : Area2D
         GD.Print("Card dropped outside zone, returning");
         ReturnToOriginalZ();
         var tween = CreateTween();
-        tween.TweenProperty(this, "position", this.OriginalPosition, 0.2)
+        tween.TweenProperty(this, "global_position", this.OriginalPosition, 0.2)
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.Out);
     }
@@ -226,9 +227,11 @@ public partial class Card : Area2D
         return CardColor == topCard.CardColor || CardType == topCard.CardType || Number == topCard.Number;
     }
 
-    public void InstantiateCard(string cardImgName = "", CardColor? cardColor = null, CardType? cardType = null,
-        string dropZonePath = null)
+    public void InstantiateCard(Player playerHand, string cardImgName = "", CardColor? cardColor = null,
+        CardType? cardType = null,
+        string dropZonePath = null, int cardNumber = -1)
     {
+        PlayerHand = playerHand;
         CardImage = GetNode<Sprite2D>("CardImage");
         var cardImg = string.IsNullOrEmpty(cardImgName) ? "deck" : cardImgName;
         if (CardImage != null)
@@ -237,6 +240,7 @@ public partial class Card : Area2D
             CardImage.Texture = GD.Load<Texture2D>($"res://Assets/Cards/{cardImg}.png");
             CardColor = cardColor ?? CardColor.Red;
             CardType = cardType ?? CardType.Number;
+            Number = cardNumber;
             Vector2 textureSize = CardImage.Texture.GetSize();
             CardImage.Scale = new Vector2(
                 CardSize.X / textureSize.X,
@@ -245,14 +249,4 @@ public partial class Card : Area2D
             DropZonePath = dropZonePath;
         }
     }
-
-    // public void SetUpCardInfo(string cardImgName,CardColor cardColor,CardType cardType )
-    // {
-    //     if (CardImage != null)
-    //     {
-    //         CardImage.Texture = GD.Load<Texture2D>($"res://Assets/Cards/{cardImgName}.png");
-    //         CardColor = cardColor;
-    //         CardType = cardType;
-    //     }
-    // }
 }

@@ -8,19 +8,21 @@ public partial class GameManager : Node
 {
     public List<Card> _deck = new();
     private Node2D _deckPileNode;
-    private Node2D _playerHand;
+    private Player _playerHand;
     private Button _playButton;
     private Area2D _dropZone;
+    private Node2D _dropZonePileNode;
 
     public override async void _Ready()
     {
         // DebugHelper.WaitForDebugger();
 
         _deckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
-        _playerHand = GetNode<Node2D>("PlayerHand");
+        _playerHand = GetNode<Player>("PlayerHand");
         _playButton = GetNode<Button>("PlayButton");
         _playButton.Pressed += onPlayButtonPressed;
-        _dropZone = GetNode<Area2D>("DropZone");
+        _dropZone = GetNode<Area2D>("DropZonePile/Area2D");
+        _dropZonePileNode = GetNode<Node2D>("DropZonePile");
         InitDeck();
         DisplayDeckPile();
         // DisplayDeckPileWithRotation(_deckPileNode);
@@ -46,21 +48,21 @@ public partial class GameManager : Node
             if (color == CardColor.Wild) continue;
             for (int i = 0; i <= 9; i++)
             {
-                _deck.Add(CreateCard($"{color.ToString().ToLower()}{i}", color, CardType.Number));
+                _deck.Add(CreateCard($"{color.ToString().ToLower()}{i}", color, CardType.Number, i));
                 if (i == 0) continue;
-                _deck.Add(CreateCard($"{color.ToString().ToLower()}{i}", color, CardType.Number));
+                _deck.Add(CreateCard($"{color.ToString().ToLower()}{i}", color, CardType.Number, i));
             }
 
             string reverseName = $"{color.ToString().ToLower()}Reverse";
             string skipName = $"{color.ToString().ToLower()}Skip";
             string drawTwoName = $"{color.ToString().ToLower()}DrawTwo";
 
-            _deck.Add(CreateCard(reverseName, color, CardType.Reverse));
-            _deck.Add(CreateCard(reverseName, color, CardType.Reverse));
-            _deck.Add(CreateCard(skipName, color, CardType.Skip));
-            _deck.Add(CreateCard(skipName, color, CardType.Skip));
-            _deck.Add(CreateCard(drawTwoName, color, CardType.DrawTwo));
-            _deck.Add(CreateCard(drawTwoName, color, CardType.DrawTwo));
+            _deck.Add(CreateCard(reverseName, color, CardType.Reverse, -2));
+            _deck.Add(CreateCard(reverseName, color, CardType.Reverse, -2));
+            _deck.Add(CreateCard(skipName, color, CardType.Skip, -3));
+            _deck.Add(CreateCard(skipName, color, CardType.Skip, -3));
+            _deck.Add(CreateCard(drawTwoName, color, CardType.DrawTwo, -4));
+            _deck.Add(CreateCard(drawTwoName, color, CardType.DrawTwo, -4));
         }
 
         for (int i = 0; i < 4; i++)
@@ -107,11 +109,11 @@ public partial class GameManager : Node
         }
     }
 
-    private Card CreateCard(string cardImgName, CardColor cardColor, CardType cardType)
+    private Card CreateCard(string cardImgName, CardColor cardColor, CardType cardType, int cardNumber = -1)
     {
         var cardScence = GD.Load<PackedScene>("res://Scenes/card.tscn");
         var newCard = cardScence.Instantiate<Card>();
-        newCard.InstantiateCard(cardImgName, cardColor, cardType, _dropZone.GetPath());
+        newCard.InstantiateCard(_playerHand, cardImgName, cardColor, cardType, _dropZonePileNode.GetPath(), cardNumber);
         return newCard;
     }
 
@@ -156,8 +158,10 @@ public partial class GameManager : Node
 
                 // Card visualCard = CreateCard($"deck", CardColor.Wild, CardType.Wild); // 顯示用，不影響資料堆
                 // GD.Print(card.CardImage.Texture.ResourcePath);
-                card.Position = _deckPileNode.GlobalPosition;
-                AddChild(card);
+                // AddChild(card);
+
+                _playerHand.AddCard(card);
+                card.GlobalPosition = _deckPileNode.GlobalPosition;
 
                 Vector2 targetPos = _playerHand.GlobalPosition + new Vector2(startX + i * spacing, 0);
                 card.SetAlwaysOnTop();
@@ -167,10 +171,7 @@ public partial class GameManager : Node
                 await ToSignal(tween, "finished");
 
                 // 紀錄目前位置
-                card.OriginalPosition = card.Position;
-
-                // _playerHand.AddChild(card);
-                // var pos = card.ToLocal(targetPos);
+                card.OriginalPosition = targetPos;
             }
         }
     }
