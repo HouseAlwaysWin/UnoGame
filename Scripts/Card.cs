@@ -51,10 +51,12 @@ public partial class Card : Area2D
     private Node2D _dropZoneNode;
     private string CardImgName;
     private static int _globalZCounter = 1000;
+    private GameManager _gameManager;
 
     public override void _Ready()
     {
         // DebugHelper.WaitForDebugger();
+        _gameManager = GetParent().GetParent<GameManager>();
         AddToGroup("card");
         if (IsInteractive)
         {
@@ -211,6 +213,26 @@ public partial class Card : Area2D
         ZIndex = OriginalZIndex;
     }
 
+    public Card GetTopCardInDropZone(Node dropZoneNode)
+    {
+        Card topCard = null;
+        int maxZ = int.MinValue;
+
+        foreach (var child in dropZoneNode.GetChildren())
+        {
+            if (child is Card card)
+            {
+                if (card.ZIndex > maxZ)
+                {
+                    maxZ = card.ZIndex;
+                    topCard = card;
+                }
+            }
+        }
+
+        return topCard;
+    }
+
     private async void HandleDrop()
     {
         if (_dropZone != null)
@@ -223,8 +245,9 @@ public partial class Card : Area2D
                 var halfSize = dropSize / 2;
 
                 var dropZoneRect = new Rect2(dropZonePos - halfSize, dropSize);
+                var dropZoneTopCard = GetTopCardInDropZone(_dropZoneNode);
 
-                if (dropZoneRect.HasPoint(GlobalPosition))
+                if (dropZoneRect.HasPoint(GlobalPosition) && dropZoneTopCard.IsPlayable(this))
                 {
                     IsInteractive = false;
                     KillShakeTween();
@@ -259,9 +282,9 @@ public partial class Card : Area2D
 
     public bool IsPlayable(Card topCard)
     {
-        if (CardColor == CardColor.Wild)
+        if (CardColor == CardColor.Wild || topCard.CardColor == CardColor.Wild)
             return true;
-        return CardColor == topCard.CardColor || CardType == topCard.CardType || Number == topCard.Number;
+        return CardColor == topCard.CardColor || (CardType == topCard.CardType && Number == topCard.Number);
     }
 
     public void InstantiateCard(Player playerHand, string cardImgName = "", CardColor? cardColor = null,

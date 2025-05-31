@@ -19,19 +19,21 @@ public partial class GameManager : Node
     private Button _playButton2;
     private Area2D _dropZone;
     private Node2D _dropZonePileNode;
-
+    private Node2D _otherPlayer;
+    private Card _topCardInDropZone;
 
     public override async void _Ready()
     {
         // DebugHelper.WaitForDebugger();
 
+        _otherPlayer = GetNode<Node2D>("OtherPlayer");
         _deckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
         _playerHand = GetNode<Player>("PlayerHand");
         _playButton = GetNode<Button>("PlayButton");
         _playButton.Pressed += onPlayButtonPressed;
 
         _playButton2 = GetNode<Button>("PlayButton2");
-        _playButton.Pressed += onPlayButtonPressed2;
+        _playButton2.Pressed += onPlayButtonPressed2;
 
         _dropZone = GetNode<Area2D>("DropZonePile/Area2D");
         _dropZonePileNode = GetNode<Node2D>("DropZonePile");
@@ -40,14 +42,38 @@ public partial class GameManager : Node
         // DisplayDeckPileWithRotation(_deckPileNode);
         // DealInitialCards();
         ShuffleDeck();
-        await DealingCardsAsync(_playerHand, 7);
+        await DealingCardsToPlayerAsync(_playerHand, 7);
 
         await InitComPlayerHandAsync();
+        await DealBeginCard();
+    }
+
+    private async Task DealBeginCard()
+    {
+        Card card = _deck[0];
+        _deck.RemoveAt(0);
+        await MoveCardToTarget(card, _deckPileNode, _dropZonePileNode);
+    }
+
+    public async Task<bool> TryPlayCardToDropZone(Card card, Node2D dropZone, Node2D handZone)
+    {
+        if (_topCardInDropZone == null || card.IsPlayable(_topCardInDropZone))
+        {
+            Node2D oldParent = (Node2D)card.GetParent();
+            _topCardInDropZone = card;
+            await MoveCardToTarget(card, oldParent, dropZone);
+            return true;
+        }
+        else
+        {
+            GD.Print("Card is not playable. Returning to hand.");
+            await MoveCardToTarget(card, (Node2D)card.GetParent(), handZone);
+            return false;
+        }
     }
 
     private void onPlayButtonPressed2()
     {
-        _playerHand.ReorderHand();
     }
 
     public async Task InitComPlayerHandAsync(int? playerNumber = null)
@@ -59,7 +85,7 @@ public partial class GameManager : Node
             var newPlayer = playerScence.Instantiate<Player>();
             newPlayer.Name = $"COM Player {i + 1}";
             AddChild(newPlayer);
-            await DealingCardsAsync(newPlayer, 7);
+            await DealingCardsToPlayerAsync(newPlayer, 7);
         }
     }
 
@@ -68,7 +94,7 @@ public partial class GameManager : Node
         GD.Print(_deck.Count);
         if (_deck.Count > 7)
         {
-            await DealingCardsAsync();
+            await DealingCardsToPlayerAsync();
             _playerHand.ReorderHand();
         }
     }
@@ -161,7 +187,7 @@ public partial class GameManager : Node
         }
     }
 
-    private async Task DealingCardsAsync(Player? playerHand = null, int? dealNum = null)
+    private async Task DealingCardsToPlayerAsync(Player? playerHand = null, int? dealNum = null)
     {
         Player player = playerHand ?? _playerHand;
         int cardsToDeal = dealNum ?? CardsToDeal;
@@ -209,5 +235,44 @@ public partial class GameManager : Node
                 }
             }
         }
+    }
+
+
+    /// <summary>
+    /// 通用卡片移動
+    /// </summary>
+    /// <param name="card"></param>
+    /// <param name="fromNode"></param>
+    /// <param name="toNode"></param>
+    /// <param name="offset"></param>
+    /// <param name="duration"></param>
+    public async Task MoveCardToTarget(Card card, Node2D fromNode, Node2D toNode, Vector2 offset = default,
+        float duration = 0.4f)
+    {
+        // 1. 紀錄卡牌目前的 global 位置
+        // Vector2 fromGlobal = fromNode.GlobalPosition;
+
+        // 2. 從來源節點移除，加到目的地節點
+        if (card.GetParent() == fromNode)
+            fromNode?.RemoveChild(card);
+        toNode.AddChild(card);
+
+        // 3. 將卡片位置設定為原本 global 位置（在新 parent 下）
+        card.GlobalPosition = fromNode.GlobalPosition;
+        card.SetAlwaysOnTop();
+        card.IsInteractive = false;
+
+        // 4. 計算動畫目標位置
+        Vector2 targetGlobal = toNode is Node2D to2D ? to2D.GlobalPosition + offset : toNode.GlobalPosition;
+
+        // 5. 執行 Tween 動畫
+        var tween = CreateTween();
+        tween.TweenProperty(card, "global_position", targetGlobal, duration)
+            .SetTrans(Tween.TransitionType.Sine)
+            .SetEase(Tween.EaseType.Out);
+        await ToSignal(tween, "finished");
+
+        card.OriginalPosition = targetGlobal;
+        card.IsInteractive = false;
     }
 }
