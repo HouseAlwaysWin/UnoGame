@@ -37,8 +37,15 @@ public partial class Player : Node2D
 
         int cardsToDeal = cards.Count;
         float spacing = _gameManager.CardSpacing;
-        float startX = -((cardsToDeal - 1) * spacing / 2f);
-
+        // float startX = -((cardsToDeal - 1) * spacing / 2f);
+        // float startX = GetViewport().GetVisibleRect().Size.X /2;
+        float startX = 0;
+        
+        var maxCardSpacing = cardsToDeal * spacing;
+        if (maxCardSpacing > _gameManager.MaxCardSpacing)
+        {
+            spacing = _gameManager.MaxCardSpacing / cardsToDeal;
+        }
         for (int i = 0; i < cardsToDeal; i++)
         {
             var card = cards[i];

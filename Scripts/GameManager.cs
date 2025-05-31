@@ -6,12 +6,17 @@ using GodotHelper;
 
 public partial class GameManager : Node
 {
+    [Export] public int CardsToDeal = 7;
     [Export] public float CardSpacing = 50;
+    [Export] public float MaxCardSpacing = 200;
+
+    [Export] public int ComPlayerNumber = 3;
 
     public List<Card> _deck = new();
     private Node2D _deckPileNode;
     private Player _playerHand;
     private Button _playButton;
+    private Button _playButton2;
     private Area2D _dropZone;
     private Node2D _dropZonePileNode;
 
@@ -24,6 +29,10 @@ public partial class GameManager : Node
         _playerHand = GetNode<Player>("PlayerHand");
         _playButton = GetNode<Button>("PlayButton");
         _playButton.Pressed += onPlayButtonPressed;
+
+        _playButton2 = GetNode<Button>("PlayButton2");
+        _playButton.Pressed += onPlayButtonPressed2;
+
         _dropZone = GetNode<Area2D>("DropZonePile/Area2D");
         _dropZonePileNode = GetNode<Node2D>("DropZonePile");
         InitDeck();
@@ -31,18 +40,26 @@ public partial class GameManager : Node
         // DisplayDeckPileWithRotation(_deckPileNode);
         // DealInitialCards();
         ShuffleDeck();
-        await DealInitialCardsAsync();
-        InitComPlayerHand(3);
+        await DealingCardsAsync(_playerHand, 7);
+
+        await InitComPlayerHandAsync();
     }
 
-    public void InitComPlayerHand(int playerNumber)
+    private void onPlayButtonPressed2()
     {
-        for (int i = 0; i < playerNumber; i++)
+        _playerHand.ReorderHand();
+    }
+
+    public async Task InitComPlayerHandAsync(int? playerNumber = null)
+    {
+        int comPlayerNumber = playerNumber ?? ComPlayerNumber;
+        for (int i = 0; i < comPlayerNumber; i++)
         {
             var playerScence = GD.Load<PackedScene>("res://Scenes/player.tscn");
             var newPlayer = playerScence.Instantiate<Player>();
             newPlayer.Name = $"COM Player {i + 1}";
             AddChild(newPlayer);
+            await DealingCardsAsync(newPlayer, 7);
         }
     }
 
@@ -51,7 +68,8 @@ public partial class GameManager : Node
         GD.Print(_deck.Count);
         if (_deck.Count > 7)
         {
-            await DealInitialCardsAsync();
+            await DealingCardsAsync();
+            _playerHand.ReorderHand();
         }
     }
 
@@ -102,7 +120,7 @@ public partial class GameManager : Node
             visualCard.Position = new Vector2(0, -i * OffsetStep); // 小小位移
             visualCard.ZIndex = i;
             visualCard.RotationDegrees = GD.Randf() * RotationStep - (RotationStep / 2); // 微旋轉
-            visualCard.IsInDeck = true;
+            visualCard.IsInteractive = false;
             // visualCard.Modulate = new Color(1, 1, 1, 0.8f); // 透明度微低
 
             _deckPileNode.AddChild(visualCard);
@@ -143,12 +161,21 @@ public partial class GameManager : Node
         }
     }
 
-    private async Task DealInitialCardsAsync()
+    private async Task DealingCardsAsync(Player? playerHand = null, int? dealNum = null)
     {
-        int cardsToDeal = 7;
+        Player player = playerHand ?? _playerHand;
+        int cardsToDeal = dealNum ?? CardsToDeal;
         float spacing = CardSpacing;
-        float startX = -((cardsToDeal - 1) * spacing / 2f);
+        // float startX = -((cardsToDeal - 1) * spacing / 2f);
+        Vector2 windowSize = DisplayServer.WindowGetSize();
+        float startX = 0;
+
         if (_deck.Count < 5) cardsToDeal = _deck.Count;
+        var maxCardSpacing = cardsToDeal * spacing;
+        if (maxCardSpacing > MaxCardSpacing)
+        {
+            spacing = MaxCardSpacing / cardsToDeal;
+        }
 
         for (int i = 0; i < cardsToDeal; i++)
         {
@@ -161,18 +188,25 @@ public partial class GameManager : Node
                 // GD.Print(card.CardImage.Texture.ResourcePath);
                 // AddChild(card);
 
-                _playerHand.AddCard(card);
-                card.GlobalPosition = _deckPileNode.GlobalPosition;
-
-                Vector2 targetPos = _playerHand.GlobalPosition + new Vector2(startX + i * spacing, 0);
-                card.SetAlwaysOnTop();
-                var tween = CreateTween();
-                tween.TweenProperty(card, "global_position", targetPos, 0.5).SetTrans(Tween.TransitionType.Sine)
-                    .SetEase(Tween.EaseType.Out);
-                await ToSignal(tween, "finished");
-
-                // 紀錄目前位置
-                card.OriginalPosition = targetPos;
+                player.AddCard(card);
+                if (player != _playerHand)
+                {
+                    card.Hide();
+                }
+                else
+                {
+                    card.GlobalPosition = _deckPileNode.GlobalPosition;
+                    card.IsInteractive = false;
+                    Vector2 targetPos = player.GlobalPosition + new Vector2(startX + i * spacing, 0);
+                    card.SetAlwaysOnTop();
+                    var tween = CreateTween();
+                    tween.TweenProperty(card, "global_position", targetPos, 0.5).SetTrans(Tween.TransitionType.Sine)
+                        .SetEase(Tween.EaseType.Out);
+                    await ToSignal(tween, "finished");
+                    card.IsInteractive = true;
+                    // 紀錄目前位置
+                    card.OriginalPosition = targetPos;
+                }
             }
         }
     }

@@ -6,13 +6,18 @@
 
 [node name="Main" type="Node"]
 script = ExtResource("1_bo1nx")
-CardSpacing = 40.0
+CardsToDeal = 1
+CardSpacing = 80.0
+MaxCardSpacing = 500.0
 
 [node name="PlayerHand" parent="." instance=ExtResource("2_8gbba")]
-position = Vector2(569, 501)
+position = Vector2(360, 544)
 
 [node name="DeckPile" type="Node2D" parent="."]
-position = Vector2(143, 154)
+position = Vector2(1135, 130)
+
+[node name="DropZonePile" parent="." instance=ExtResource("2_bo1nx")]
+position = Vector2(592, 163)
 
 [node name="PlayButton" type="Button" parent="."]
 offset_right = 8.0
@@ -20,5 +25,10 @@ offset_bottom = 8.0
 theme_override_font_sizes/font_size = 30
 text = "發牌"
 
-[node name="DropZonePile" parent="." instance=ExtResource("2_bo1nx")]
-position = Vector2(592, 163)
+[node name="PlayButton2" type="Button" parent="."]
+offset_left = 6.0
+offset_top = 69.0
+offset_right = 134.0
+offset_bottom = 119.0
+theme_override_font_sizes/font_size = 30
+text = "排序排組"

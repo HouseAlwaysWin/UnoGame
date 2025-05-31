@@ -31,8 +31,11 @@ public partial class Card : Area2D
     [Export] public CardType CardType;
     [Export] public CardColor CardColor;
     [Export] public Sprite2D CardImage;
+
     [Export] public int Number = -1;
-    [Export] public bool IsInDeck = false;
+
+    // [Export] public bool IsInDeck = false;
+    public bool IsInteractive = true; // 預設不可互動
 
     public Player PlayerHand;
     public Vector2 OriginalPosition;
@@ -53,7 +56,7 @@ public partial class Card : Area2D
     {
         // DebugHelper.WaitForDebugger();
         AddToGroup("card");
-        if (!IsInDeck)
+        if (IsInteractive)
         {
             MouseEntered += OnMouseEntered;
             MouseExited += OnMouseExited;
@@ -75,23 +78,22 @@ public partial class Card : Area2D
         }
     }
 
-    private void KillShakeTween()
-    {
-        if (_hoverTween != null && _hoverTween.IsRunning() || IsInDeck)
-        {
-            _hoverTween.Kill();
-            RotationDegrees = 0f;
-        }
-    }
 
     private void OnMouseExited()
     {
-        KillShakeTween();
+        // KillShakeTween();
+        ShowDownCardTween();
     }
 
     private void OnMouseEntered()
     {
-        if (IsInDeck || !IsTopZIndexUnderMouse()) return;
+        if (!IsTopZIndexUnderMouse()) return;
+        // ShakeTween();
+        ShowUpCardTween();
+    }
+
+    private void ShakeTween()
+    {
         _hoverTween = CreateTween();
         _hoverTween.SetLoops();
         _hoverTween.TweenProperty(this, "rotation_degrees", 2f, 0.1).SetTrans(Tween.TransitionType.Sine)
@@ -102,10 +104,45 @@ public partial class Card : Area2D
             .SetEase(Tween.EaseType.InOut);
     }
 
+    private void KillShakeTween()
+    {
+        if (_hoverTween != null || !IsInteractive)
+        {
+            if (_hoverTween.IsRunning())
+            {
+                _hoverTween.Kill();
+            }
+
+            RotationDegrees = 0f;
+        }
+    }
+
+    private async void ShowUpCardTween()
+    {
+        if (!IsInteractive) return;
+        _hoverTween?.Kill(); // 若還有舊 Tween，先取消
+        _hoverTween = CreateTween();
+        _hoverTween.TweenProperty(this, "global_position", OriginalPosition + new Vector2(0, -50), 0.15)
+            .SetTrans(Tween.TransitionType.Sine)
+            .SetEase(Tween.EaseType.Out);
+        await ToSignal(_hoverTween, "finished");
+    }
+
+    private async void ShowDownCardTween()
+    {
+        if (!IsInteractive) return;
+        _hoverTween?.Kill();
+        _hoverTween = CreateTween();
+        _hoverTween.TweenProperty(this, "global_position", OriginalPosition, 0.15)
+            .SetTrans(Tween.TransitionType.Sine)
+            .SetEase(Tween.EaseType.Out);
+        await ToSignal(_hoverTween, "finished");
+    }
+
 
     public override void _InputEvent(Viewport viewport, InputEvent @event, int shapeIdx)
     {
-        if (@event is InputEventMouseButton mouseEvent && !IsInDeck)
+        if (@event is InputEventMouseButton mouseEvent && IsInteractive)
         {
             if (mouseEvent.ButtonIndex == MouseButton.Left)
             {
@@ -189,10 +226,9 @@ public partial class Card : Area2D
 
                 if (dropZoneRect.HasPoint(GlobalPosition))
                 {
-                    IsInDeck = true;
+                    IsInteractive = false;
                     KillShakeTween();
-                    
-                     
+
                     // Vector2 globalPos = dropZonePos;
                     PlayerHand.RemoveCard(this);
                     _dropZoneNode.AddChild(this);
@@ -207,11 +243,12 @@ public partial class Card : Area2D
 
         // 沒有放到正確區域：回原位、ZIndex 還原
         GD.Print("Card dropped outside zone, returning");
-        ReturnToOriginalZ();
         var tween = CreateTween();
         tween.TweenProperty(this, "global_position", this.OriginalPosition, 0.2)
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.Out);
+        IsInteractive = true;
+        ReturnToOriginalZ();
     }
 
     private void ToggleSelection()
