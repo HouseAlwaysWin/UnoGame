@@ -10,6 +10,12 @@ CardsToDeal = 1
 CardSpacing = 80.0
 MaxCardSpacing = 500.0
 
+[node name="PlayerInfoPanel" type="VBoxContainer" parent="."]
+offset_left = 100.0
+offset_top = 300.0
+offset_right = 140.0
+offset_bottom = 340.0
+
 [node name="PlayerHand" parent="." instance=ExtResource("2_8gbba")]
 position = Vector2(360, 544)
 
@@ -34,4 +40,4 @@ theme_override_font_sizes/font_size = 30
 text = "測試"
 
 [node name="OtherPlayer" type="Node2D" parent="."]
-position = Vector2(56, 264)
+position = Vector2(88, 328)

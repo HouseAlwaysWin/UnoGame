@@ -20,7 +20,10 @@ public partial class GameManager : Node
     private Area2D _dropZone;
     private Node2D _dropZonePileNode;
     private Node2D _otherPlayer;
-    private Card _topCardInDropZone;
+    private VBoxContainer _playerInfoPanel;
+    private List<Label> _playerInfoPanelLabels = new();
+    private int _currentPlayerIndex = 0;
+    private List<Player> _players = new();
 
     public override async void _Ready()
     {
@@ -35,17 +38,17 @@ public partial class GameManager : Node
         _playButton2 = GetNode<Button>("PlayButton2");
         _playButton2.Pressed += onPlayButtonPressed2;
 
+        _playerInfoPanel = GetNode<VBoxContainer>("PlayerInfoPanel");
+
         _dropZone = GetNode<Area2D>("DropZonePile/Area2D");
         _dropZonePileNode = GetNode<Node2D>("DropZonePile");
         InitDeck();
         DisplayDeckPile();
-        // DisplayDeckPileWithRotation(_deckPileNode);
-        // DealInitialCards();
         ShuffleDeck();
-        await DealingCardsToPlayerAsync(_playerHand, 7);
 
-        await InitComPlayerHandAsync();
+        await InitPlayerAndUIAsync();
         await DealBeginCard();
+        await DealingCardsToPlayerAsync(_playerHand, 7);
     }
 
     private async Task DealBeginCard()
@@ -55,39 +58,87 @@ public partial class GameManager : Node
         await MoveCardToTarget(card, _deckPileNode, _dropZonePileNode);
     }
 
-    public async Task<bool> TryPlayCardToDropZone(Card card, Node2D dropZone, Node2D handZone)
-    {
-        if (_topCardInDropZone == null || card.IsPlayable(_topCardInDropZone))
-        {
-            Node2D oldParent = (Node2D)card.GetParent();
-            _topCardInDropZone = card;
-            await MoveCardToTarget(card, oldParent, dropZone);
-            return true;
-        }
-        else
-        {
-            GD.Print("Card is not playable. Returning to hand.");
-            await MoveCardToTarget(card, (Node2D)card.GetParent(), handZone);
-            return false;
-        }
-    }
 
     private void onPlayButtonPressed2()
     {
     }
 
-    public async Task InitComPlayerHandAsync(int? playerNumber = null)
+    public async Task InitPlayerAndUIAsync(int? playerNumber = null)
     {
         int comPlayerNumber = playerNumber ?? ComPlayerNumber;
-        for (int i = 0; i < comPlayerNumber; i++)
+        // add current player
+        _players.Add(_playerHand);
+        CreatedPlayerUI(_playerHand, 1);
+        // add other players
+        for (int i = 1; i < comPlayerNumber + 1; i++)
         {
             var playerScence = GD.Load<PackedScene>("res://Scenes/player.tscn");
             var newPlayer = playerScence.Instantiate<Player>();
+            newPlayer.PlayerId = i;
             newPlayer.Name = $"COM Player {i + 1}";
             AddChild(newPlayer);
             await DealingCardsToPlayerAsync(newPlayer, 7);
+            _players.Add(newPlayer);
+            CreatedPlayerUI(newPlayer, i + 1);
+        }
+
+        UpdateCurrentPlayerUI();
+    }
+
+    public void CreatedPlayerUI(Player player, int number)
+    {
+        var hbox = new HBoxContainer();
+
+        var avatar = new TextureRect
+        {
+            Texture = GD.Load<Texture2D>($"res://Assets/Avatars/avatar{number}.jpeg"),
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.Scale,
+            CustomMinimumSize = new Vector2(50, 50),
+            SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter
+        };
+
+        var label = new Label
+        {
+            Text = player.Name,
+            Name = player.Name
+        };
+
+        hbox.AddChild(avatar);
+        hbox.AddChild(label);
+
+        _playerInfoPanel.AddChild(hbox);
+        _playerInfoPanelLabels.Add(label);
+    }
+
+    public void UpdateCurrentPlayerUI()
+    {
+        for (int i = 0; i < _playerInfoPanelLabels.Count; i++)
+        {
+            _playerInfoPanelLabels[i]
+                .AddThemeColorOverride("font_color", i == _currentPlayerIndex ? Colors.Yellow : Colors.White);
         }
     }
+
+    // public void SetupPlayerUI()
+    // {
+    //     // _playerInfoLabels.Clear();
+    //     // _playerInfoPanel.ClearChildren(); // 需要你自建拓展方法或手動刪除
+    //
+    //     for (int i = 0; i < _players.Count; i++)
+    //     {
+    //         var label = new Label
+    //         {
+    //             Text = _players[i].PlayerId,
+    //             Name = $"PlayerInfo_{i}"
+    //         };
+    //         _playerInfoPanel.AddChild(label);
+    //         // _playerInfoLabels.Add(label);
+    //     }
+    //
+    //     // UpdateCurrentPlayerUI();
+    // }
+
 
     private async void onPlayButtonPressed()
     {

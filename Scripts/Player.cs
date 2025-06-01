@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 public partial class Player : Node2D
 {
-    [Export] public string PlayerId;
+    public int PlayerId;
     private GameManager _gameManager;
 
     public override void _Ready()
@@ -40,22 +40,23 @@ public partial class Player : Node2D
         // float startX = -((cardsToDeal - 1) * spacing / 2f);
         // float startX = GetViewport().GetVisibleRect().Size.X /2;
         float startX = 0;
-        
+
         var maxCardSpacing = cardsToDeal * spacing;
         if (maxCardSpacing > _gameManager.MaxCardSpacing)
         {
             spacing = _gameManager.MaxCardSpacing / cardsToDeal;
         }
+
         for (int i = 0; i < cardsToDeal; i++)
         {
             var card = cards[i];
             Vector2 targetPos = GlobalPosition + new Vector2(startX + i * spacing, 0);
             var tween = card.CreateTween();
-            tween.TweenProperty(card, "global_position", targetPos, 0.2)
+            tween.TweenProperty(card, "global_position", targetPos, 0.09)
                 .SetTrans(Tween.TransitionType.Sine)
                 .SetEase(Tween.EaseType.Out);
             await ToSignal(tween, "finished");
-            
+
             card.OriginalPosition = targetPos;
             // card.SetAlwaysOnTop();
         }
