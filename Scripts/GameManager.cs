@@ -42,12 +42,12 @@ public partial class GameManager : Node
         _playButton2 = GetNode<Button>("PlayButton2");
         _playButton2.Pressed += onPlayButtonPressed2;
 
-        _playerInfoPanel = GetNode<VBoxContainer>("PlayerInfoPanel");
 
         _dropZone = GetNode<Area2D>("DropZonePile/Area2D");
         _dropZonePileNode = GetNode<Node2D>("DropZonePile");
 
-        _directionLabel = GetNode<Label>("DirectionLabel"); // 改成實際節點路徑
+        _playerInfoPanel = GetNode<VBoxContainer>("UI/PlayerInfoPanel");
+        _directionLabel = GetNode<Label>("UI/DirectionLabel"); // 改成實際節點路徑
         _directionLabel.Text = "→ 順時針";
 
         InitDeck();
