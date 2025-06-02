@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://dxobqmv5p3elk"]
+[gd_scene load_steps=5 format=3 uid="uid://dxobqmv5p3elk"]
 
 [ext_resource type="Script" uid="uid://bhsixk7jaxc6o" path="res://Scripts/GameManager.cs" id="1_bo1nx"]
 [ext_resource type="PackedScene" uid="uid://uodlgyfqonj5" path="res://Scenes/player.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://c86x7vo8htqv7" path="res://Scenes/drop_zone.tscn" id="2_bo1nx"]
+[ext_resource type="PackedScene" uid="uid://bqc6j50tq72ju" path="res://Scenes/direction_arrow.tscn" id="4_jjvhh"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_bo1nx")
@@ -45,13 +46,11 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="PlayerInfoPanel" type="VBoxContainer" parent="UI"]
-offset_left = 32.0
-offset_top = 42.0
-offset_right = 72.0
-offset_bottom = 82.0
+layout_mode = 0
+offset_left = 88.0
+offset_top = 24.0
+offset_right = 128.0
+offset_bottom = 64.0
 
-[node name="DirectionLabel" type="Label" parent="UI"]
-offset_left = 110.0
-offset_top = 44.0
-offset_right = 146.0
-offset_bottom = 72.0
+[node name="DirectionArrow" parent="." instance=ExtResource("4_jjvhh")]
+position = Vector2(40, 104)

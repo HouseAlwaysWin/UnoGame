@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://bqc6j50tq72ju"]
+
+[ext_resource type="Texture2D" uid="uid://btl1cp5tte84j" path="res://Assets/UI/arrow.png" id="1_fah4p"]
+
+[node name="DirectionArrowPivot" type="Node2D"]
+rotation = 1.5708
+
+[node name="DirectionArrow" type="TextureRect" parent="."]
+offset_left = -25.0
+offset_top = -25.0
+offset_right = 25.0
+offset_bottom = 25.0
+texture = ExtResource("1_fah4p")
+expand_mode = 1

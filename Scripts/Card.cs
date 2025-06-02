@@ -26,8 +26,7 @@ public enum CardType
 
 public partial class Card : Area2D
 {
-    [ExportGroup("Card Information")]
-    [Export]
+    [ExportGroup("Card Information")] [Export]
     public Vector2 CardSize = new Vector2(100, 150);
 
     [Export] public CardType CardType;
@@ -47,7 +46,12 @@ public partial class Card : Area2D
 
 
     private Tween _tween;
-    public bool IsTweenRunning { get => _tween?.IsRunning() ?? false; }
+
+    public bool IsTweenRunning
+    {
+        get => _tween?.IsRunning() ?? false;
+    }
+
     private bool _isDragging = false;
     private Vector2 _dragOffset;
     private Area2D _dropZone;
@@ -57,18 +61,13 @@ public partial class Card : Area2D
     private GameManager _gameManager;
     private bool _isHovered = false;
 
+
     public override void _Ready()
     {
         // DebugHelper.WaitForDebugger();
         _gameManager = GetParent().GetParent<GameManager>();
         AddToGroup("card");
-        // if (IsInteractive)
-        // {
-        //     MouseEntered += OnMouseEntered;
-        //     MouseExited += OnMouseExited;
-        // }
-
-
+        
         if (!string.IsNullOrWhiteSpace(DropZonePath))
         {
             _dropZoneNode = GetNode<Node2D>(DropZonePath);
@@ -95,7 +94,7 @@ public partial class Card : Area2D
                 _isHovered = true;
             }
         }
-        else
+        else if (!IsTopZIndexUnderMouse())
         {
             if (_isHovered)
             {
@@ -166,23 +165,25 @@ public partial class Card : Area2D
         await ToSignal(_tween, "finished");
         ReturnToOriginalZ();
     }
+    
+   
 
 
     public override void _InputEvent(Viewport viewport, InputEvent @event, int shapeIdx)
     {
+        if (!IsTopZIndexUnderMouse())
+            return; // 若不是最上層卡，不接受拖曳
         if (@event is InputEventMouseButton mouseEvent && IsInteractive)
         {
             if (mouseEvent.ButtonIndex == MouseButton.Left)
             {
                 if (mouseEvent.Pressed)
                 {
-                    if (!IsTopZIndexUnderMouse())
-                        return; // 若不是最上層卡，不接受拖曳
                     _dragOffset = GetGlobalMousePosition() - GlobalPosition;
                     _isDragging = true;
                     SetAlwaysOnTop();
                 }
-                else if (!IsTweenRunning && IsTopZIndexUnderMouse())
+                else if (!IsTweenRunning)
                 {
                     // 只有自己是目前拖曳者時才能放開
                     _isDragging = false;

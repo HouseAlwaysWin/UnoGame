@@ -27,8 +27,10 @@ public partial class GameManager : Node
     private int _currentPlayerIndex = 0;
     private List<Player> _players = new();
     private bool _isClockwise = true; // true: 順時針, false: 逆時針
-    private Label _directionLabel;
-
+    
+    private Node2D _directionArrow;
+    private Tween _directionTween;
+    private float _arrowRotation = 0f;
     public override async void _Ready()
     {
         // DebugHelper.WaitForDebugger();
@@ -43,12 +45,14 @@ public partial class GameManager : Node
         _playButton2.Pressed += onPlayButtonPressed2;
 
 
+        _directionArrow = GetNode<Node2D>("DirectionArrow");
+        _directionArrow.RotationDegrees = 90;
+        _arrowRotation = 90;
+
         _dropZone = GetNode<Area2D>("DropZonePile/Area2D");
         _dropZonePileNode = GetNode<Node2D>("DropZonePile");
 
         _playerInfoPanel = GetNode<VBoxContainer>("UI/PlayerInfoPanel");
-        _directionLabel = GetNode<Label>("UI/DirectionLabel"); // 改成實際節點路徑
-        _directionLabel.Text = "→ 順時針";
 
         InitDeck();
         DisplayDeckPile();
@@ -69,6 +73,23 @@ public partial class GameManager : Node
 
     private void onPlayButtonPressed2()
     {
+        ReverseDirection();
+    }
+    
+    public async Task ReverseDirection()
+    {
+        _isClockwise = !_isClockwise;
+
+        // 每次翻轉加 180 度
+        _arrowRotation += 180f;
+
+        _directionTween?.Kill();
+        _directionTween = CreateTween();
+        _directionTween.TweenProperty(_directionArrow, "rotation_degrees", _arrowRotation, 0.5)
+            .SetTrans(Tween.TransitionType.Sine)
+            .SetEase(Tween.EaseType.InOut);
+
+        GD.Print($"方向翻轉：{(_isClockwise ? "順時針" : "逆時針")}");
     }
 
     public async Task InitPlayerAndUIAsync(int? playerNumber = null)
@@ -158,15 +179,6 @@ public partial class GameManager : Node
         }
 
         UpdateCurrentPlayerUI();
-    }
-
-    public void ReverseDirection()
-    {
-        _isClockwise = !_isClockwise;
-        if (_directionLabel != null)
-            _directionLabel.Text = _isClockwise ? "→ 順時針" : "← 逆時針";
-
-        GD.Print($"方向翻轉，現在是{(_isClockwise ? "順時針" : "逆時針")}");
     }
 
     public void UpdateCurrentPlayerUI()
