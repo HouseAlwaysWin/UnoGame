@@ -177,8 +177,8 @@ public partial class GameManager : Node
 
         for (int i = 0; i < 4; i++)
         {
-            string wildName = $"{nameof(CardType.Wild).ToLower()}";
-            string wildDrawFourName = $"{nameof(CardType.WildDrawFour).ToLower()}";
+            string wildName = $"{CardType.Wild.ToString().ToLower()}";
+            string wildDrawFourName = $"{CardType.WildDrawFour.ToString().ToCamelCase()}";
             _deck.Add(CreateCard(wildName, CardColor.Wild, CardType.Wild, 13));
             _deck.Add(CreateCard(wildDrawFourName, CardColor.Wild, CardType.WildDrawFour, 14));
         }
