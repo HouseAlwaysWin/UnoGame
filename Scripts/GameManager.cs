@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GodotHelper;
+using System.Linq;
 
 public partial class GameManager : Node
 {
@@ -22,8 +23,11 @@ public partial class GameManager : Node
     private Node2D _otherPlayer;
     private VBoxContainer _playerInfoPanel;
     private List<Label> _playerInfoPanelLabels = new();
+    private List<Label> _playerSeqPanelLabels = new();
     private int _currentPlayerIndex = 0;
     private List<Player> _players = new();
+    private bool _isClockwise = true; // true: 順時針, false: 逆時針
+    private Label _directionLabel;
 
     public override async void _Ready()
     {
@@ -42,6 +46,10 @@ public partial class GameManager : Node
 
         _dropZone = GetNode<Area2D>("DropZonePile/Area2D");
         _dropZonePileNode = GetNode<Node2D>("DropZonePile");
+
+        _directionLabel = GetNode<Label>("DirectionLabel"); // 改成實際節點路徑
+        _directionLabel.Text = "→ 順時針";
+
         InitDeck();
         DisplayDeckPile();
         ShuffleDeck();
@@ -66,10 +74,11 @@ public partial class GameManager : Node
     public async Task InitPlayerAndUIAsync(int? playerNumber = null)
     {
         int comPlayerNumber = playerNumber ?? ComPlayerNumber;
-        // add current player
+
+        // 1. 加入玩家（含本地玩家與 COM）
+        _players.Clear();
         _players.Add(_playerHand);
-        CreatedPlayerUI(_playerHand, 1);
-        // add other players
+
         for (int i = 1; i < comPlayerNumber + 1; i++)
         {
             var playerScence = GD.Load<PackedScene>("res://Scenes/player.tscn");
@@ -79,11 +88,29 @@ public partial class GameManager : Node
             AddChild(newPlayer);
             await DealingCardsToPlayerAsync(newPlayer, 7);
             _players.Add(newPlayer);
-            CreatedPlayerUI(newPlayer, i + 1);
         }
 
+        // 2. 打亂 _players 順序（遊戲邏輯用）
+        var rng = new Random();
+        _players = _players.OrderBy(_ => rng.Next()).ToList();
+
+        // 3. 清空 UI 面板
+        _playerInfoPanelLabels.Clear();
+        _playerSeqPanelLabels.Clear();
+        foreach (var child in _playerInfoPanel.GetChildren())
+            _playerInfoPanel.RemoveChild(child);
+
+        // 4. 建立 UI（依照打亂順序）
+        for (int i = 0; i < _players.Count; i++)
+        {
+            CreatedPlayerUI(_players[i], i + 1); // 傳入玩家 + 頭像編號
+        }
+
+        // 5. 顯示目前玩家
+        _currentPlayerIndex = 0;
         UpdateCurrentPlayerUI();
     }
+
 
     public void CreatedPlayerUI(Player player, int number)
     {
@@ -98,23 +125,55 @@ public partial class GameManager : Node
             SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter
         };
 
+        var seqLabel = new Label
+        {
+            Text = "1",
+            Name = player.Name
+
+        };
+
         var label = new Label
         {
             Text = player.Name,
             Name = player.Name
         };
-
+        hbox.AddChild(seqLabel);
         hbox.AddChild(avatar);
         hbox.AddChild(label);
-
+        _playerSeqPanelLabels.Add(seqLabel);
         _playerInfoPanel.AddChild(hbox);
         _playerInfoPanelLabels.Add(label);
+    }
+
+
+    public void NextTurn()
+    {
+        if (_isClockwise)
+        {
+            _currentPlayerIndex = (_currentPlayerIndex + 1) % _players.Count;
+        }
+        else
+        {
+            _currentPlayerIndex = (_currentPlayerIndex - 1 + _players.Count) % _players.Count;
+        }
+
+        UpdateCurrentPlayerUI();
+    }
+
+    public void ReverseDirection()
+    {
+        _isClockwise = !_isClockwise;
+        if (_directionLabel != null)
+            _directionLabel.Text = _isClockwise ? "→ 順時針" : "← 逆時針";
+
+        GD.Print($"方向翻轉，現在是{(_isClockwise ? "順時針" : "逆時針")}");
     }
 
     public void UpdateCurrentPlayerUI()
     {
         for (int i = 0; i < _playerInfoPanelLabels.Count; i++)
         {
+            _playerSeqPanelLabels[i].Text = $"{i + 1}.";
             _playerInfoPanelLabels[i]
                 .AddThemeColorOverride("font_color", i == _currentPlayerIndex ? Colors.Yellow : Colors.White);
         }
