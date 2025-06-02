@@ -55,17 +55,18 @@ public partial class Card : Area2D
     private string CardImgName;
     private static int _globalZCounter = 1000;
     private GameManager _gameManager;
+    private bool _isHovered = false;
 
     public override void _Ready()
     {
         // DebugHelper.WaitForDebugger();
         _gameManager = GetParent().GetParent<GameManager>();
         AddToGroup("card");
-        if (IsInteractive)
-        {
-            MouseEntered += OnMouseEntered;
-            MouseExited += OnMouseExited;
-        }
+        // if (IsInteractive)
+        // {
+        //     MouseEntered += OnMouseEntered;
+        //     MouseExited += OnMouseExited;
+        // }
 
 
         if (!string.IsNullOrWhiteSpace(DropZonePath))
@@ -73,6 +74,8 @@ public partial class Card : Area2D
             _dropZoneNode = GetNode<Node2D>(DropZonePath);
             _dropZone = _dropZoneNode.GetNode<Area2D>("Area2D");
         }
+
+        OriginalZIndex = ZIndex;
     }
 
     public override void _Process(double delta)
@@ -81,20 +84,39 @@ public partial class Card : Area2D
         {
             GlobalPosition = GetGlobalMousePosition() - _dragOffset;
         }
+
+
+        if (IsTweenRunning || _isDragging) return;
+        if (IsInteractive && IsTopZIndexUnderMouse())
+        {
+            if (!_isHovered)
+            {
+                ShowUpCardTween();
+                _isHovered = true;
+            }
+        }
+        else
+        {
+            if (_isHovered)
+            {
+                ShowDownCardTween();
+                _isHovered = false;
+            }
+        }
     }
 
 
-    private void OnMouseExited()
-    {
-        if (_isDragging) return;
-        ShowDownCardTween();
-    }
+    // private void OnMouseExited()
+    // {
+    //     if (_isDragging) return;
+    //     ShowDownCardTween();
+    // }
 
-    private void OnMouseEntered()
-    {
-        if (!IsTopZIndexUnderMouse() || IsTweenRunning || _isDragging) return;
-        ShowUpCardTween();
-    }
+    // private void OnMouseEntered()
+    // {
+    //     if (!IsTopZIndexUnderMouse() || IsTweenRunning || _isDragging) return;
+    //     ShowUpCardTween();
+    // }
 
     private async Task ShakeTween()
     {
@@ -142,6 +164,7 @@ public partial class Card : Area2D
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.Out);
         await ToSignal(_tween, "finished");
+        ReturnToOriginalZ();
     }
 
 
@@ -159,11 +182,15 @@ public partial class Card : Area2D
                     _isDragging = true;
                     SetAlwaysOnTop();
                 }
-                else if (!IsTweenRunning)
+                else if (!IsTweenRunning && IsTopZIndexUnderMouse())
                 {
                     // 只有自己是目前拖曳者時才能放開
                     _isDragging = false;
                     HandleDrop();
+                }
+                else
+                {
+                    ReturnToOriginalZ();
                 }
             }
         }
@@ -206,8 +233,8 @@ public partial class Card : Area2D
 
     public void SetAlwaysOnTop()
     {
+        if (!IsInteractive) return;
         ZAsRelative = false; // 確保 ZIndex 是全局有效的
-        OriginalZIndex = ZIndex;
         ZIndex = _globalZCounter++;
     }
 
