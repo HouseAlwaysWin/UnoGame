@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GodotHelper;
+using System.Threading.Tasks;
 
 public enum CardColor
 {
@@ -25,7 +26,8 @@ public enum CardType
 
 public partial class Card : Area2D
 {
-    [ExportGroup("Card Information")] [Export]
+    [ExportGroup("Card Information")]
+    [Export]
     public Vector2 CardSize = new Vector2(100, 150);
 
     [Export] public CardType CardType;
@@ -44,7 +46,8 @@ public partial class Card : Area2D
     public int OriginalZIndex;
 
 
-    private Tween _hoverTween;
+    private Tween _tween;
+    public bool IsTweenRunning { get => _tween?.IsRunning() ?? false; }
     private bool _isDragging = false;
     private Vector2 _dragOffset;
     private Area2D _dropZone;
@@ -83,36 +86,36 @@ public partial class Card : Area2D
 
     private void OnMouseExited()
     {
-        // KillShakeTween();
+        if (_isDragging) return;
         ShowDownCardTween();
     }
 
     private void OnMouseEntered()
     {
-        if (!IsTopZIndexUnderMouse()) return;
-        // ShakeTween();
+        if (!IsTopZIndexUnderMouse() || IsTweenRunning || _isDragging) return;
         ShowUpCardTween();
     }
 
-    private void ShakeTween()
+    private async Task ShakeTween()
     {
-        _hoverTween = CreateTween();
-        _hoverTween.SetLoops();
-        _hoverTween.TweenProperty(this, "rotation_degrees", 2f, 0.1).SetTrans(Tween.TransitionType.Sine)
+        _tween = CreateTween();
+        _tween.SetLoops();
+        _tween.TweenProperty(this, "rotation_degrees", 2f, 0.1).SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.InOut);
-        _hoverTween.TweenProperty(this, "rotation_degrees", -2f, 0.2).SetTrans(Tween.TransitionType.Sine)
+        _tween.TweenProperty(this, "rotation_degrees", -2f, 0.2).SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.InOut);
-        _hoverTween.TweenProperty(this, "rotation_degrees", 0f, 0.1).SetTrans(Tween.TransitionType.Sine)
+        _tween.TweenProperty(this, "rotation_degrees", 0f, 0.1).SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.InOut);
+        await ToSignal(_tween, "finished");
     }
 
     private void KillShakeTween()
     {
-        if (_hoverTween != null || !IsInteractive)
+        if (_tween != null || !IsInteractive)
         {
-            if (_hoverTween.IsRunning())
+            if (_tween.IsRunning())
             {
-                _hoverTween.Kill();
+                _tween.Kill();
             }
 
             RotationDegrees = 0f;
@@ -122,23 +125,23 @@ public partial class Card : Area2D
     private async void ShowUpCardTween()
     {
         if (!IsInteractive) return;
-        _hoverTween?.Kill(); // 若還有舊 Tween，先取消
-        _hoverTween = CreateTween();
-        _hoverTween.TweenProperty(this, "global_position", OriginalPosition + new Vector2(0, -50), 0.15)
+        _tween?.Kill(); // 若還有舊 Tween，先取消
+        _tween = CreateTween();
+        _tween.TweenProperty(this, "global_position", OriginalPosition + new Vector2(0, -50), 0.15)
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.Out);
-        await ToSignal(_hoverTween, "finished");
+        await ToSignal(_tween, "finished");
     }
 
     private async void ShowDownCardTween()
     {
         if (!IsInteractive) return;
-        _hoverTween?.Kill();
-        _hoverTween = CreateTween();
-        _hoverTween.TweenProperty(this, "global_position", OriginalPosition, 0.15)
+        _tween?.Kill();
+        _tween = CreateTween();
+        _tween.TweenProperty(this, "global_position", OriginalPosition, 0.15)
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.Out);
-        await ToSignal(_hoverTween, "finished");
+        await ToSignal(_tween, "finished");
     }
 
 
@@ -156,7 +159,7 @@ public partial class Card : Area2D
                     _isDragging = true;
                     SetAlwaysOnTop();
                 }
-                else
+                else if (!IsTweenRunning)
                 {
                     // 只有自己是目前拖曳者時才能放開
                     _isDragging = false;
@@ -266,12 +269,15 @@ public partial class Card : Area2D
 
         // 沒有放到正確區域：回原位、ZIndex 還原
         GD.Print("Card dropped outside zone, returning");
-        var tween = CreateTween();
-        tween.TweenProperty(this, "global_position", this.OriginalPosition, 0.2)
+        _tween?.Kill();
+        _tween = CreateTween();
+        _tween.TweenProperty(this, "global_position", this.OriginalPosition, 0.2)
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.Out);
-        IsInteractive = true;
+        await ToSignal(_tween, "finished");
         ReturnToOriginalZ();
+        await Task.Delay(100); // 微延遲防止立即觸發 Hover
+        IsInteractive = true;
     }
 
     private void ToggleSelection()

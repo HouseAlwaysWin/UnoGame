@@ -11,10 +11,10 @@ CardSpacing = 80.0
 MaxCardSpacing = 500.0
 
 [node name="PlayerInfoPanel" type="VBoxContainer" parent="."]
-offset_left = 100.0
-offset_top = 300.0
-offset_right = 140.0
-offset_bottom = 340.0
+offset_left = 32.0
+offset_top = 42.0
+offset_right = 72.0
+offset_bottom = 82.0
 
 [node name="PlayerHand" parent="." instance=ExtResource("2_8gbba")]
 position = Vector2(360, 544)
@@ -26,16 +26,18 @@ position = Vector2(1135, 130)
 position = Vector2(592, 163)
 
 [node name="PlayButton" type="Button" parent="."]
-offset_right = 8.0
-offset_bottom = 8.0
+offset_left = 21.0
+offset_top = 645.0
+offset_right = 89.0
+offset_bottom = 695.0
 theme_override_font_sizes/font_size = 30
 text = "發牌"
 
 [node name="PlayButton2" type="Button" parent="."]
-offset_left = 6.0
-offset_top = 69.0
-offset_right = 134.0
-offset_bottom = 119.0
+offset_left = 1.0
+offset_top = 581.0
+offset_right = 129.0
+offset_bottom = 631.0
 theme_override_font_sizes/font_size = 30
 text = "測試"
 
