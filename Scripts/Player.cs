@@ -7,6 +7,7 @@ public partial class Player : Node2D
 {
     public int PlayerId;
     private GameManager _gameManager;
+    public Tween ReorderHandeTween;
 
     public override void _Ready()
     {
@@ -24,6 +25,17 @@ public partial class Player : Node2D
     {
         RemoveChild(card);
         // ReorderHand();
+    }
+
+    public void SetAllCardsInteractive(bool interactive)
+    {
+        foreach (var child in this.GetChildren())
+        {
+            if (child is Card card)
+            {
+                card.IsInteractive = interactive;
+            }
+        }
     }
 
     public async Task ReorderHand()
@@ -54,11 +66,11 @@ public partial class Player : Node2D
             // ✅ 設定唯一 ZIndex
             card.ZAsRelative = false;
             card.ZIndex = i;
-            var tween = card.CreateTween();
-            tween.TweenProperty(card, "global_position", targetPos, 0.09)
+            ReorderHandeTween = card.CreateTween();
+            ReorderHandeTween.TweenProperty(card, "global_position", targetPos, 0.09)
                 .SetTrans(Tween.TransitionType.Sine)
                 .SetEase(Tween.EaseType.Out);
-            await ToSignal(tween, "finished");
+            await ToSignal(ReorderHandeTween, "finished");
 
             card.OriginalPosition = targetPos;
             card.OriginalZIndex = card.ZIndex;

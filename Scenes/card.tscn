@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://cde14fbowjau4"]
+[gd_scene load_steps=6 format=3 uid="uid://cde14fbowjau4"]
 
 [ext_resource type="Script" uid="uid://bh4luesglka0y" path="res://Scripts/Card.cs" id="1_0qqmn"]
+[ext_resource type="Script" uid="uid://cfi0dqbiqcqpe" path="res://Scripts/CardAnimator.cs" id="2_wf8id"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0qqmn"]
 size = Vector2(100, 150)
@@ -41,3 +42,6 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_0qqmn")
 
 [node name="CardImage" type="Sprite2D" parent="."]
 texture = SubResource("PlaceholderTexture2D_gmcdd")
+
+[node name="CardAnimator" type="Node" parent="."]
+script = ExtResource("2_wf8id")

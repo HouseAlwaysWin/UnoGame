@@ -37,14 +37,13 @@ public partial class Card : Area2D
     [Export] public int Number = -1;
 
     // [Export] public bool IsInDeck = false;
-    public bool IsInteractive = true; // 預設不可互動
+    public bool IsInteractive = false; // 預設不可互動
 
     public Player PlayerHand;
     public Vector2 OriginalPosition;
     public string DropZonePath;
     public bool IsSelected = false;
     public int OriginalZIndex;
-
 
     private Tween _tween;
 
@@ -61,6 +60,7 @@ public partial class Card : Area2D
     private static int _globalZCounter = 1000;
     private GameManager _gameManager;
     private bool _isHovered = false;
+    private CardAnimator _animator;
 
     public Vector2 DragOffset { get; private set; }
 
@@ -68,8 +68,10 @@ public partial class Card : Area2D
     public override void _Ready()
     {
         // DebugHelper.WaitForDebugger();
-        _gameManager = GetParent().GetParent<GameManager>();
+
         AddToGroup("card");
+        _gameManager = GetParent().GetParent<GameManager>();
+        _animator = GetNode<CardAnimator>("CardAnimator");
 
         if (!string.IsNullOrWhiteSpace(DropZonePath))
         {
@@ -86,104 +88,21 @@ public partial class Card : Area2D
         {
             GlobalPosition = GetGlobalMousePosition() - _dragOffset;
         }
-
-
-        // if (IsTweenRunning || IsDragging) return;
-        // if (IsInteractive && IsTopZIndexUnderMouse())
-        // {
-        //     if (!_isHovered)
-        //     {
-        //         ShowUpCardTween();
-        //         _isHovered = true;
-        //     }
-        // }
-        // else if (!IsTopZIndexUnderMouse())
-        // {
-        //     if (_isHovered)
-        //     {
-        //         ShowDownCardTween();
-        //         _isHovered = false;
-        //     }
-        // }
     }
 
-    public void OnHoverEnter()
+    public async void OnHoverEnter()
     {
         if (_isHovered || IsDragging || !IsInteractive || IsTweenRunning) return;
         _isHovered = true;
-        ShowUpCardTween();
+        await _animator.HoverUp();
     }
 
-    public void OnHoverExit()
+    public async void OnHoverExit()
     {
         if (!_isHovered || IsDragging || !IsInteractive) return;
         _isHovered = false;
-        ShowDownCardTween();
+        await _animator.HoverDown();
     }
-
-    // private void OnMouseExited()
-    // {
-    //     if (_isDragging) return;
-    //     ShowDownCardTween();
-    // }
-
-    // private void OnMouseEntered()
-    // {
-    //     if (!IsTopZIndexUnderMouse() || IsTweenRunning || _isDragging) return;
-    //     ShowUpCardTween();
-    // }
-
-    private async Task ShakeTween()
-    {
-        _tween = CreateTween();
-        _tween.SetLoops();
-        _tween.TweenProperty(this, "rotation_degrees", 2f, 0.1).SetTrans(Tween.TransitionType.Sine)
-            .SetEase(Tween.EaseType.InOut);
-        _tween.TweenProperty(this, "rotation_degrees", -2f, 0.2).SetTrans(Tween.TransitionType.Sine)
-            .SetEase(Tween.EaseType.InOut);
-        _tween.TweenProperty(this, "rotation_degrees", 0f, 0.1).SetTrans(Tween.TransitionType.Sine)
-            .SetEase(Tween.EaseType.InOut);
-        await ToSignal(_tween, "finished");
-    }
-
-    // private void KillShakeTween()
-    // {
-    //     if (_tween != null || !IsInteractive)
-    //     {
-    //         if (_tween.IsRunning())
-    //         {
-    //             _tween.Kill();
-    //         }
-
-    //         RotationDegrees = 0f;
-    //     }
-    // }
-
-    public async void ShowUpCardTween()
-    {
-        if (!IsInteractive) return;
-        _tween?.Kill(); // 若還有舊 Tween，先取消
-        _tween = CreateTween();
-        _tween.TweenProperty(this, "global_position", OriginalPosition + new Vector2(0, -50), 0.15)
-            .SetTrans(Tween.TransitionType.Sine)
-            .SetEase(Tween.EaseType.Out);
-        await ToSignal(_tween, "finished");
-    }
-
-    public async void ShowDownCardTween()
-    {
-        if (!IsInteractive) return;
-        _tween?.Kill();
-        _tween = CreateTween();
-        _tween.TweenProperty(this, "global_position", OriginalPosition, 0.15)
-            .SetTrans(Tween.TransitionType.Sine)
-            .SetEase(Tween.EaseType.Out);
-        await ToSignal(_tween, "finished");
-        ReturnToOriginalZ();
-    }
-
-
-
 
     public override void _InputEvent(Viewport viewport, InputEvent @event, int shapeIdx)
     {
@@ -219,39 +138,6 @@ public partial class Card : Area2D
         }
     }
 
-
-    // private bool IsTopZIndexUnderMouse()
-    // {
-    //     // 獲取滑鼠目前位置下所有碰到的 Area2D（使用 DirectSpaceState）
-    //     var space = GetWorld2D().DirectSpaceState;
-    //     // 滑鼠目前位置下有哪些 Area2D 被碰到
-    //     var result = space.IntersectPoint(new PhysicsPointQueryParameters2D
-    //     {
-    //         Position = GetGlobalMousePosition(),
-    //         CollideWithAreas = true
-    //     });
-    //     // 準備找出 ZIndex 最大的卡片
-    //     int maxZ = int.MinValue;
-    //     Card topCard = null;
-
-    //     foreach (var r in result)
-    //     {
-    //         var area = r["collider"].As<Area2D>();
-    //         // 過濾掉不是卡片的物件，並確認是否是我們的 Card 類別
-    //         if (area != null && area.IsInGroup("card") && area is Card c)
-    //         {
-    //             // 如果這張卡片的 ZIndex 更高，就記住它
-    //             if (c.ZIndex > maxZ)
-    //             {
-    //                 maxZ = c.ZIndex;
-    //                 topCard = c;
-    //             }
-    //         }
-    //     }
-
-    //     // 最後回傳：如果滑鼠下最高 ZIndex 的卡片是我自己，才允許拖曳
-    //     return topCard == this;
-    // }
 
 
     public void SetAlwaysOnTop()
@@ -317,12 +203,7 @@ public partial class Card : Area2D
 
         // 沒有放到正確區域：回原位、ZIndex 還原
         GD.Print("Card dropped outside zone, returning");
-        _tween?.Kill();
-        _tween = CreateTween();
-        _tween.TweenProperty(this, "global_position", this.OriginalPosition, 0.2)
-            .SetTrans(Tween.TransitionType.Sine)
-            .SetEase(Tween.EaseType.Out);
-        await ToSignal(_tween, "finished");
+        await _animator.TweenTo(this.OriginalPosition, 0.2f);
         ReturnToOriginalZ();
         await Task.Delay(100); // 微延遲防止立即觸發 Hover
         IsInteractive = true;
