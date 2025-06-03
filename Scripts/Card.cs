@@ -188,7 +188,8 @@ public partial class Card : Area2D
                 {
                     IsInteractive = false;
 
-                    PlayerHand.RemoveCard(this);
+                    // PlayerHand.RemoveCard(this);
+                    PlayerHand.RemoveChild(this);
                     _dropZoneNode.AddChild(this);
                     Position = _dropZoneNode.ToLocal(dropZonePos);
                     await PlayerHand.ReorderHand();

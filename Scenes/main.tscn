@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://bhsixk7jaxc6o" path="res://Scripts/GameManager.cs" id="1_bo1nx"]
 [ext_resource type="PackedScene" uid="uid://uodlgyfqonj5" path="res://Scenes/player.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://c86x7vo8htqv7" path="res://Scenes/drop_zone.tscn" id="2_bo1nx"]
-[ext_resource type="PackedScene" path="res://Scenes/direction_arrow.tscn" id="4_jjvhh"]
-[ext_resource type="PackedScene" uid="uid://swttoeppx8s" path="res://Scenes/game_state_machine.tscn" id="5_kry3j"]
+[ext_resource type="PackedScene" uid="uid://bqc6j50tq72ju" path="res://Scenes/direction_arrow.tscn" id="4_jjvhh"]
+[ext_resource type="PackedScene" uid="uid://byit0qli8ttm6" path="res://Scenes/game_state_machine.tscn" id="5_kry3j"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_bo1nx")

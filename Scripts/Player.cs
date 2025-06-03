@@ -14,18 +14,18 @@ public partial class Player : Node2D
         _gameManager = GetParent<GameManager>();
     }
 
-    public void AddCard(Card card)
-    {
-        // card.PlayerId = PlayerId;
-        AddChild(card);
-        // ReorderHand();
-    }
+    // public void AddCard(Card card)
+    // {
+    //     // card.PlayerId = PlayerId;
+    //     AddChild(card);
+    //     // ReorderHand();
+    // }
 
-    public void RemoveCard(Card card)
-    {
-        RemoveChild(card);
-        // ReorderHand();
-    }
+    // public void RemoveCard(Card card)
+    // {
+    //     RemoveChild(card);
+    //     // ReorderHand();
+    // }
 
     public void SetAllCardsInteractive(bool interactive)
     {

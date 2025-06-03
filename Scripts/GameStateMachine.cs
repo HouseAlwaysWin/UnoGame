@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public enum GameState
@@ -34,14 +36,17 @@ public partial class GameStateMachine : Node
         {
             case GameState.Init:
                 InitDeck();
-                ShuffleDeck();
+                ShuffleDeck(_gameManager.Deck);
                 DisplayDeckPile();
                 break;
 
             case GameState.DealCards:
                 await _gameManager.InitPlayerAndUIAsync();
                 await _gameManager.DealBeginCard();
-                await DealingCardsToPlayerAsync(_gameManager.PlayerHand, 7);
+                await _gameManager.MoveCardsToTarget(_gameManager.Deck, 7, _gameManager.DeckPileNode,
+                    _gameManager.PlayerHand,
+                    (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); });
+                // await DealingCardsToPlayerAsync(_gameManager.PlayerHand, 7);
                 _gameManager.PlayerHand.SetAllCardsInteractive(true);
                 ChangeState(GameState.WaitForPlayerAction);
                 break;
@@ -67,9 +72,11 @@ public partial class GameStateMachine : Node
             if (color == CardColor.Wild) continue;
             for (int i = 0; i <= 9; i++)
             {
-                _gameManager.Deck.Add(_gameManager.CreateCard($"{color.ToString().ToLower()}{i}", color, CardType.Number, i));
+                _gameManager.Deck.Add(_gameManager.CreateCard($"{color.ToString().ToLower()}{i}", color,
+                    CardType.Number, i));
                 if (i == 0) continue;
-                _gameManager.Deck.Add(_gameManager.CreateCard($"{color.ToString().ToLower()}{i}", color, CardType.Number, i));
+                _gameManager.Deck.Add(_gameManager.CreateCard($"{color.ToString().ToLower()}{i}", color,
+                    CardType.Number, i));
             }
 
             string reverseName = $"{color.ToString().ToLower()}Reverse";
@@ -114,70 +121,76 @@ public partial class GameStateMachine : Node
         }
     }
 
-    public void ShuffleDeck()
+    public void ShuffleDeck(List<Card> cards)
     {
         Random random = new Random();
-        for (int i = _gameManager.Deck.Count - 1; i > 0; i--)
+        for (int i = cards.Count - 1; i > 0; i--)
         {
             int j = random.Next(i + 1);
-            (_gameManager.Deck[i], _gameManager.Deck[j]) = (_gameManager.Deck[j], _gameManager.Deck[i]);
+            (cards[i], cards[j]) = (cards[j], cards[i]);
+            // 設定階層
+            cards[i].ZIndex = i;
         }
         // 設定階層
-        for (int i = 0; i < _gameManager.Deck.Count - 1; i++)
-        {
-            _gameManager.Deck[i].ZIndex = i;
-        }
+        // for (int i = 0; i < cards.Count - 1; i++)
+        // {
+        //     cards[i].ZIndex = i;
+        // }
     }
 
-    public async Task DealingCardsToPlayerAsync(Player? playerHand = null, int? dealNum = null)
+    public async Task DealingCardsToPlayerAsync(Player? playerHand = null, int dealNum = 1, bool showAnimation = true,
+        bool showCard = true)
     {
-        Player player = playerHand ?? _gameManager.PlayerHand;
-        int cardsToDeal = dealNum ?? _gameManager.CardsToDeal;
-        float spacing = _gameManager.CardSpacing;
-        // float startX = -((cardsToDeal - 1) * spacing / 2f);
-        Vector2 windowSize = DisplayServer.WindowGetSize();
-        float startX = 0;
-
-        if (_gameManager.Deck.Count < 5) cardsToDeal = _gameManager.Deck.Count;
-        var maxCardSpacing = cardsToDeal * spacing;
-        if (maxCardSpacing > _gameManager.MaxCardSpacing)
-        {
-            spacing = _gameManager.MaxCardSpacing / cardsToDeal;
-        }
-
-        for (int i = 0; i < cardsToDeal; i++)
-        {
-            if (_gameManager.Deck.Count > 0)
-            {
-                Card card = _gameManager.Deck[0];
-                _gameManager.Deck.RemoveAt(0);
-
-                // Card visualCard = CreateCard($"deck", CardColor.Wild, CardType.Wild); // 顯示用，不影響資料堆
-                // GD.Print(card.CardImage.Texture.ResourcePath);
-                // AddChild(card);
-
-                player.AddCard(card);
-                if (player != _gameManager.PlayerHand)
-                {
-                    card.Hide();
-                }
-                else
-                {
-                    card.GlobalPosition = _gameManager.DeckPileNode.GlobalPosition;
-                    // card.IsInteractive = false;
-                    Vector2 targetPos = player.GlobalPosition + new Vector2(startX + i * spacing, 0);
-                    card.SetAlwaysOnTop();
-                    var tween = CreateTween();
-                    tween.TweenProperty(card, "global_position", targetPos, 0.5).SetTrans(Tween.TransitionType.Sine)
-                        .SetEase(Tween.EaseType.Out);
-                    await ToSignal(tween, "finished");
-                    // card.IsInteractive = true;
-                    // 紀錄目前位置
-                    card.OriginalPosition = targetPos;
-                }
-            }
-        }
+        await _gameManager.MoveCardsToTarget(_gameManager.Deck, dealNum, _gameManager.DeckPileNode, playerHand,
+            (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); }, showAnimation: showAnimation,
+            showCard: showCard);
     }
 
-
+    // public async Task DealingCardsToPlayerAsync(Player? playerHand = null, int? dealNum = null)
+    // {
+    //     Player player = playerHand ?? _gameManager.PlayerHand;
+    //     int cardsToDeal = dealNum ?? _gameManager.CardsToDeal;
+    //     float spacing = _gameManager.CardSpacing;
+    //     float startX = 0;
+    //
+    //     if (_gameManager.Deck.Count < 5) cardsToDeal = _gameManager.Deck.Count;
+    //     var maxCardSpacing = cardsToDeal * spacing;
+    //     if (maxCardSpacing > _gameManager.MaxCardSpacing)
+    //     {
+    //         spacing = _gameManager.MaxCardSpacing / cardsToDeal;
+    //     }
+    //
+    //     for (int i = 0; i < cardsToDeal; i++)
+    //     {
+    //         if (_gameManager.Deck.Count > 0)
+    //         {
+    //             Card card = _gameManager.Deck[0];
+    //             _gameManager.Deck.RemoveAt(0);
+    //
+    //             // Card visualCard = CreateCard($"deck", CardColor.Wild, CardType.Wild); // 顯示用，不影響資料堆
+    //             // GD.Print(card.CardImage.Texture.ResourcePath);
+    //             // AddChild(card);
+    //
+    //             player.AddChild(card);
+    //             if (player != _gameManager.PlayerHand)
+    //             {
+    //                 card.Hide();
+    //             }
+    //             else
+    //             {
+    //                 card.GlobalPosition = _gameManager.DeckPileNode.GlobalPosition;
+    //                 // card.IsInteractive = false;
+    //                 Vector2 targetPos = player.GlobalPosition + new Vector2(startX + i * spacing, 0);
+    //                 card.SetAlwaysOnTop();
+    //                 var tween = CreateTween();
+    //                 tween.TweenProperty(card, "global_position", targetPos, 0.5).SetTrans(Tween.TransitionType.Sine)
+    //                     .SetEase(Tween.EaseType.Out);
+    //                 await ToSignal(tween, "finished");
+    //                 // card.IsInteractive = true;
+    //                 // 紀錄目前位置
+    //                 card.OriginalPosition = targetPos;
+    //             }
+    //         }
+    //     }
+    // }
 }

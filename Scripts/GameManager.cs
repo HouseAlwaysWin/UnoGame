@@ -84,14 +84,13 @@ public partial class GameManager : Node2D
         {
             UpdateHoveredCard();
         }
-
     }
 
     public async Task DealBeginCard()
     {
         Card card = Deck[0];
         Deck.RemoveAt(0);
-        await MoveOneCardToTarget(card, DeckPileNode, DropZonePileNode);
+        await MoveCardToTarget(card, DeckPileNode, DropZonePileNode);
     }
 
 
@@ -132,7 +131,7 @@ public partial class GameManager : Node2D
             newPlayer.PlayerId = i;
             newPlayer.Name = $"COM Player {i + 1}";
             AddChild(newPlayer);
-            await _gameStateMachine.DealingCardsToPlayerAsync(newPlayer, 7);
+            await _gameStateMachine.DealingCardsToPlayerAsync(newPlayer, 7,false,false);
             Players.Add(newPlayer);
         }
 
@@ -175,7 +174,6 @@ public partial class GameManager : Node2D
         {
             Text = "1",
             Name = player.Name
-
         };
 
         var label = new Label
@@ -283,7 +281,7 @@ public partial class GameManager : Node2D
         GD.Print(Deck.Count);
         if (Deck.Count > 7)
         {
-            await _gameStateMachine.DealingCardsToPlayerAsync();
+            await _gameStateMachine.DealingCardsToPlayerAsync(PlayerHand);
             await PlayerHand.ReorderHand();
             PlayerHand.SetAllCardsInteractive(true);
         }
@@ -307,12 +305,9 @@ public partial class GameManager : Node2D
     /// <param name="toNode"></param>
     /// <param name="offset"></param>
     /// <param name="duration"></param
-    public async Task MoveOneCardToTarget(Card card, Node2D fromNode, Node2D toNode, Vector2 offset = default,
-        float duration = 0.4f)
+    public async Task MoveCardToTarget(Card card, Node2D fromNode, Node2D toNode, Vector2 offset = default,
+        float duration = 0.4f,bool showAnimation = true,bool showCard=true)
     {
-        // 1. 紀錄卡牌目前的 global 位置
-        // Vector2 fromGlobal = fromNode.GlobalPosition;
-
         // 2. 從來源節點移除，加到目的地節點
         if (card.GetParent() == fromNode)
             fromNode?.RemoveChild(card);
@@ -327,12 +322,39 @@ public partial class GameManager : Node2D
         Vector2 targetGlobal = toNode is Node2D to2D ? to2D.GlobalPosition + offset : toNode.GlobalPosition;
 
         // 5. 執行 Tween 動畫
-        var tween = CreateTween();
-        tween.TweenProperty(card, "global_position", targetGlobal, duration)
-            .SetTrans(Tween.TransitionType.Sine)
-            .SetEase(Tween.EaseType.Out);
-        await ToSignal(tween, "finished");
+        if (showAnimation)
+        {
+            var tween = CreateTween();
+            tween.TweenProperty(card, "global_position", targetGlobal, duration)
+                .SetTrans(Tween.TransitionType.Sine)
+                .SetEase(Tween.EaseType.Out);
+            await ToSignal(tween, "finished");
+        }
 
         card.OriginalPosition = targetGlobal;
+        if (!showCard)
+        {
+            card.Hide();
+        }
+    }
+
+    /// <summary>
+    /// 移動堆疊卡牌
+    /// </summary>
+    /// <param name="deck"></param>
+    /// <param name="moveNums"></param>
+    /// <param name="fromNode"></param>
+    /// <param name="toNode"></param>
+    /// <param name="offset"></param>
+    /// <param name="duration"></param>
+    public async Task MoveCardsToTarget(List<Card> deck,int moveNums ,Node2D fromNode, Node2D toNode, Func<int,Vector2> offset ,
+        float duration = 0.4f,bool showAnimation = true,bool showCard=true)
+    {
+        for (int i = 0; i < moveNums; i++)
+        {
+            Card card = deck[0];
+            deck.RemoveAt(0);
+            await MoveCardToTarget(card,fromNode,toNode,offset(i),duration,showAnimation,showCard);
+        }
     }
 }
