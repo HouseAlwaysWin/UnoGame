@@ -26,7 +26,8 @@ public enum CardType
 
 public partial class Card : Area2D
 {
-    [ExportGroup("Card Information")] [Export]
+    [ExportGroup("Card Information")]
+    [Export]
     public Vector2 CardSize = new Vector2(100, 150);
 
     [Export] public CardType CardType;
@@ -52,7 +53,7 @@ public partial class Card : Area2D
         get => _tween?.IsRunning() ?? false;
     }
 
-    private bool _isDragging = false;
+    public bool IsDragging = false;
     private Vector2 _dragOffset;
     private Area2D _dropZone;
     private Node2D _dropZoneNode;
@@ -61,13 +62,15 @@ public partial class Card : Area2D
     private GameManager _gameManager;
     private bool _isHovered = false;
 
+    public Vector2 DragOffset { get; private set; }
+
 
     public override void _Ready()
     {
         // DebugHelper.WaitForDebugger();
         _gameManager = GetParent().GetParent<GameManager>();
         AddToGroup("card");
-        
+
         if (!string.IsNullOrWhiteSpace(DropZonePath))
         {
             _dropZoneNode = GetNode<Node2D>(DropZonePath);
@@ -79,31 +82,44 @@ public partial class Card : Area2D
 
     public override void _Process(double delta)
     {
-        if (_isDragging)
+        if (IsDragging)
         {
             GlobalPosition = GetGlobalMousePosition() - _dragOffset;
         }
 
 
-        if (IsTweenRunning || _isDragging) return;
-        if (IsInteractive && IsTopZIndexUnderMouse())
-        {
-            if (!_isHovered)
-            {
-                ShowUpCardTween();
-                _isHovered = true;
-            }
-        }
-        else if (!IsTopZIndexUnderMouse())
-        {
-            if (_isHovered)
-            {
-                ShowDownCardTween();
-                _isHovered = false;
-            }
-        }
+        // if (IsTweenRunning || IsDragging) return;
+        // if (IsInteractive && IsTopZIndexUnderMouse())
+        // {
+        //     if (!_isHovered)
+        //     {
+        //         ShowUpCardTween();
+        //         _isHovered = true;
+        //     }
+        // }
+        // else if (!IsTopZIndexUnderMouse())
+        // {
+        //     if (_isHovered)
+        //     {
+        //         ShowDownCardTween();
+        //         _isHovered = false;
+        //     }
+        // }
     }
 
+    public void OnHoverEnter()
+    {
+        if (_isHovered || IsDragging || !IsInteractive || IsTweenRunning) return;
+        _isHovered = true;
+        ShowUpCardTween();
+    }
+
+    public void OnHoverExit()
+    {
+        if (!_isHovered || IsDragging || !IsInteractive) return;
+        _isHovered = false;
+        ShowDownCardTween();
+    }
 
     // private void OnMouseExited()
     // {
@@ -130,20 +146,20 @@ public partial class Card : Area2D
         await ToSignal(_tween, "finished");
     }
 
-    private void KillShakeTween()
-    {
-        if (_tween != null || !IsInteractive)
-        {
-            if (_tween.IsRunning())
-            {
-                _tween.Kill();
-            }
+    // private void KillShakeTween()
+    // {
+    //     if (_tween != null || !IsInteractive)
+    //     {
+    //         if (_tween.IsRunning())
+    //         {
+    //             _tween.Kill();
+    //         }
 
-            RotationDegrees = 0f;
-        }
-    }
+    //         RotationDegrees = 0f;
+    //     }
+    // }
 
-    private async void ShowUpCardTween()
+    public async void ShowUpCardTween()
     {
         if (!IsInteractive) return;
         _tween?.Kill(); // 若還有舊 Tween，先取消
@@ -154,7 +170,7 @@ public partial class Card : Area2D
         await ToSignal(_tween, "finished");
     }
 
-    private async void ShowDownCardTween()
+    public async void ShowDownCardTween()
     {
         if (!IsInteractive) return;
         _tween?.Kill();
@@ -165,28 +181,34 @@ public partial class Card : Area2D
         await ToSignal(_tween, "finished");
         ReturnToOriginalZ();
     }
-    
-   
+
+
 
 
     public override void _InputEvent(Viewport viewport, InputEvent @event, int shapeIdx)
     {
-        if (!IsTopZIndexUnderMouse())
-            return; // 若不是最上層卡，不接受拖曳
+        if (!IsInteractive)
+            return;
+
         if (@event is InputEventMouseButton mouseEvent && IsInteractive)
         {
             if (mouseEvent.ButtonIndex == MouseButton.Left)
             {
                 if (mouseEvent.Pressed)
                 {
+                    // ❗確保只有當前滑鼠下最上層的卡能觸發拖曳
+                    if (_gameManager.GetCardUnderMouse() != this)
+                        return;
                     _dragOffset = GetGlobalMousePosition() - GlobalPosition;
-                    _isDragging = true;
+                    IsDragging = true;
+                    _gameManager.SetDraggedCard(this);
                     SetAlwaysOnTop();
                 }
-                else if (!IsTweenRunning)
+                else if (!IsTweenRunning && _gameManager.GetCardUnderMouse() != this)
                 {
                     // 只有自己是目前拖曳者時才能放開
-                    _isDragging = false;
+                    IsDragging = false;
+                    _gameManager.ClearDraggedCard(this);
                     HandleDrop();
                 }
                 else
@@ -198,38 +220,38 @@ public partial class Card : Area2D
     }
 
 
-    private bool IsTopZIndexUnderMouse()
-    {
-        // 獲取滑鼠目前位置下所有碰到的 Area2D（使用 DirectSpaceState）
-        var space = GetWorld2D().DirectSpaceState;
-        // 滑鼠目前位置下有哪些 Area2D 被碰到
-        var result = space.IntersectPoint(new PhysicsPointQueryParameters2D
-        {
-            Position = GetGlobalMousePosition(),
-            CollideWithAreas = true
-        });
-        // 準備找出 ZIndex 最大的卡片
-        int maxZ = int.MinValue;
-        Card topCard = null;
+    // private bool IsTopZIndexUnderMouse()
+    // {
+    //     // 獲取滑鼠目前位置下所有碰到的 Area2D（使用 DirectSpaceState）
+    //     var space = GetWorld2D().DirectSpaceState;
+    //     // 滑鼠目前位置下有哪些 Area2D 被碰到
+    //     var result = space.IntersectPoint(new PhysicsPointQueryParameters2D
+    //     {
+    //         Position = GetGlobalMousePosition(),
+    //         CollideWithAreas = true
+    //     });
+    //     // 準備找出 ZIndex 最大的卡片
+    //     int maxZ = int.MinValue;
+    //     Card topCard = null;
 
-        foreach (var r in result)
-        {
-            var area = r["collider"].As<Area2D>();
-            // 過濾掉不是卡片的物件，並確認是否是我們的 Card 類別
-            if (area != null && area.IsInGroup("card") && area is Card c)
-            {
-                // 如果這張卡片的 ZIndex 更高，就記住它
-                if (c.ZIndex > maxZ)
-                {
-                    maxZ = c.ZIndex;
-                    topCard = c;
-                }
-            }
-        }
+    //     foreach (var r in result)
+    //     {
+    //         var area = r["collider"].As<Area2D>();
+    //         // 過濾掉不是卡片的物件，並確認是否是我們的 Card 類別
+    //         if (area != null && area.IsInGroup("card") && area is Card c)
+    //         {
+    //             // 如果這張卡片的 ZIndex 更高，就記住它
+    //             if (c.ZIndex > maxZ)
+    //             {
+    //                 maxZ = c.ZIndex;
+    //                 topCard = c;
+    //             }
+    //         }
+    //     }
 
-        // 最後回傳：如果滑鼠下最高 ZIndex 的卡片是我自己，才允許拖曳
-        return topCard == this;
-    }
+    //     // 最後回傳：如果滑鼠下最高 ZIndex 的卡片是我自己，才允許拖曳
+    //     return topCard == this;
+    // }
 
 
     public void SetAlwaysOnTop()
@@ -281,9 +303,7 @@ public partial class Card : Area2D
                 if (dropZoneRect.HasPoint(GlobalPosition) && dropZoneTopCard.IsPlayable(this))
                 {
                     IsInteractive = false;
-                    KillShakeTween();
 
-                    // Vector2 globalPos = dropZonePos;
                     PlayerHand.RemoveCard(this);
                     _dropZoneNode.AddChild(this);
                     Position = _dropZoneNode.ToLocal(dropZonePos);
@@ -308,11 +328,11 @@ public partial class Card : Area2D
         IsInteractive = true;
     }
 
-    private void ToggleSelection()
-    {
-        IsSelected = !IsSelected;
-        Position = IsSelected ? OriginalPosition + new Vector2(0, -20) : OriginalPosition;
-    }
+    // private void ToggleSelection()
+    // {
+    //     IsSelected = !IsSelected;
+    //     Position = IsSelected ? OriginalPosition + new Vector2(0, -20) : OriginalPosition;
+    // }
 
     public bool IsPlayable(Card topCard)
     {

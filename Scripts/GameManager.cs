@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using GodotHelper;
 using System.Linq;
 
-public partial class GameManager : Node
+public partial class GameManager : Node2D
 {
     [Export] public int CardsToDeal = 7;
     [Export] public float CardSpacing = 50;
@@ -27,10 +27,18 @@ public partial class GameManager : Node
     private int _currentPlayerIndex = 0;
     private List<Player> _players = new();
     private bool _isClockwise = true; // true: 順時針, false: 逆時針
-    
+
     private Node2D _directionArrow;
     private Tween _directionTween;
     private float _arrowRotation = 0f;
+    private Card _lastHoveredCard;
+
+    private Card _currentTopCard; // 新增
+    private Card _hoveredCard = null;
+    private Card _draggedCard = null;
+
+
+
     public override async void _Ready()
     {
         // DebugHelper.WaitForDebugger();
@@ -63,6 +71,18 @@ public partial class GameManager : Node
         await DealingCardsToPlayerAsync(_playerHand, 7);
     }
 
+    public override void _Process(double delta)
+    {
+        if (_draggedCard == null)
+        {
+            UpdateHoveredCard();
+        }
+        // else
+        // {
+        //     UpdateDraggedCard();
+        // }
+    }
+
     private async Task DealBeginCard()
     {
         Card card = _deck[0];
@@ -75,7 +95,7 @@ public partial class GameManager : Node
     {
         ReverseDirection();
     }
-    
+
     public async Task ReverseDirection()
     {
         _isClockwise = !_isClockwise;
@@ -191,25 +211,74 @@ public partial class GameManager : Node
         }
     }
 
-    // public void SetupPlayerUI()
-    // {
-    //     // _playerInfoLabels.Clear();
-    //     // _playerInfoPanel.ClearChildren(); // 需要你自建拓展方法或手動刪除
-    //
-    //     for (int i = 0; i < _players.Count; i++)
-    //     {
-    //         var label = new Label
-    //         {
-    //             Text = _players[i].PlayerId,
-    //             Name = $"PlayerInfo_{i}"
-    //         };
-    //         _playerInfoPanel.AddChild(label);
-    //         // _playerInfoLabels.Add(label);
-    //     }
-    //
-    //     // UpdateCurrentPlayerUI();
-    // }
+    private void UpdateHoveredCard()
+    {
+        var space = GetWorld2D().DirectSpaceState;
+        var result = space.IntersectPoint(new PhysicsPointQueryParameters2D
+        {
+            Position = GetGlobalMousePosition(),
+            CollideWithAreas = true
+        });
 
+        Card topCard = null;
+        int maxZ = int.MinValue;
+
+        foreach (var r in result)
+        {
+            var area = r["collider"].As<Area2D>();
+            if (area != null && area.IsInGroup("card") && area is Card c && c.IsInteractive)
+            {
+                if (c.ZIndex > maxZ || (c.ZIndex == maxZ && DistanceToMouse(c) < DistanceToMouse(topCard)))
+                {
+                    maxZ = c.ZIndex;
+                    topCard = c;
+                }
+            }
+        }
+
+        if (_hoveredCard != topCard)
+        {
+            _hoveredCard?.OnHoverExit();
+            topCard?.OnHoverEnter();
+            _hoveredCard = topCard;
+        }
+    }
+
+    private float DistanceToMouse(Card card)
+    {
+        return card.GlobalPosition.DistanceTo(GetGlobalMousePosition());
+    }
+
+    private void UpdateDraggedCard()
+    {
+        if (_draggedCard != null)
+        {
+            _draggedCard.GlobalPosition = GetGlobalMousePosition() - _draggedCard.DragOffset;
+        }
+    }
+
+    public Card GetCardUnderMouse()
+    {
+        return _hoveredCard;
+    }
+
+    public void SetDraggedCard(Card card)
+    {
+        _draggedCard = card;
+        _hoveredCard?.OnHoverExit(); // 停止 hover 狀態
+        _hoveredCard = null;
+    }
+
+    public void ClearDraggedCard(Card card)
+    {
+        if (_draggedCard == card)
+            _draggedCard = null;
+    }
+
+    public Card GetTopCardUnderMouse()
+    {
+        return _lastHoveredCard;
+    }
 
     private async void onPlayButtonPressed()
     {
@@ -266,6 +335,7 @@ public partial class GameManager : Node
         {
             Card visualCard = CreateCard($"deck", CardColor.Wild, CardType.Wild); // 顯示用，不影響資料堆
             visualCard.Position = new Vector2(0, -i * OffsetStep); // 小小位移
+            visualCard.ZAsRelative = false;
             visualCard.ZIndex = i;
             visualCard.RotationDegrees = GD.Randf() * RotationStep - (RotationStep / 2); // 微旋轉
             visualCard.IsInteractive = false;
@@ -290,12 +360,13 @@ public partial class GameManager : Node
         }
     }
 
-    private Card CreateCard(string cardImgName, CardColor cardColor, CardType cardType, int cardNumber = -1)
+    private Card CreateCard(string cardImgName, CardColor cardColor, CardType cardType, int cardNumber = -1, int zindex = 0)
     {
         var cardScence = GD.Load<PackedScene>("res://Scenes/card.tscn");
         var newCard = cardScence.Instantiate<Card>();
         newCard.InstantiateCard(_playerHand, cardImgName, cardColor, cardType, _dropZonePileNode.GetPath(), cardNumber);
         newCard.Name = $"{cardColor}{cardType}{cardNumber}";
+        newCard.ZIndex = zindex;
         return newCard;
     }
 
@@ -306,6 +377,11 @@ public partial class GameManager : Node
         {
             int j = random.Next(i + 1);
             (_deck[i], _deck[j]) = (_deck[j], _deck[i]);
+        }
+        // 設定階層
+        for (int i = 0; i < _deck.Count - 1; i++)
+        {
+            _deck[i].ZIndex = i;
         }
     }
 

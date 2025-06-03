@@ -51,6 +51,9 @@ public partial class Player : Node2D
         {
             var card = cards[i];
             Vector2 targetPos = GlobalPosition + new Vector2(startX + i * spacing, 0);
+            // ✅ 設定唯一 ZIndex
+            card.ZAsRelative = false;
+            card.ZIndex = i;
             var tween = card.CreateTween();
             tween.TweenProperty(card, "global_position", targetPos, 0.09)
                 .SetTrans(Tween.TransitionType.Sine)
@@ -58,6 +61,7 @@ public partial class Player : Node2D
             await ToSignal(tween, "finished");
 
             card.OriginalPosition = targetPos;
+            card.OriginalZIndex = card.ZIndex;
             // card.SetAlwaysOnTop();
         }
     }

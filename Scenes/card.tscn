@@ -29,7 +29,7 @@ CardImage = NodePath("CardImage")
 position = Vector2(1, 0.5)
 shape = SubResource("RectangleShape2D_0qqmn")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Border" type="Panel" parent="."]
 clip_contents = true
 custom_minimum_size = Vector2(102, 152)
 offset_left = -50.0
