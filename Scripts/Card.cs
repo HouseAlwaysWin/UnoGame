@@ -138,8 +138,6 @@ public partial class Card : Area2D
         }
     }
 
-
-
     public void SetAlwaysOnTop()
     {
         if (!IsInteractive) return;
