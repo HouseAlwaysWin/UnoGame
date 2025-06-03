@@ -43,6 +43,7 @@ public partial class GameStateMachine : Node
                 await _gameManager.DealBeginCard();
                 await DealingCardsToPlayerAsync(_gameManager.PlayerHand, 7);
                 _gameManager.PlayerHand.SetAllCardsInteractive(true);
+                ChangeState(GameState.WaitForPlayerAction);
                 break;
 
             case GameState.WaitForPlayerAction:

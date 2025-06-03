@@ -97,7 +97,8 @@ public partial class GameManager : Node2D
 
     private void onPlayButtonPressed2()
     {
-        ReverseDirection();
+        // ReverseDirection();
+        NextTurn();
     }
 
     public async Task ReverseDirection()
@@ -305,7 +306,7 @@ public partial class GameManager : Node2D
     /// <param name="fromNode"></param>
     /// <param name="toNode"></param>
     /// <param name="offset"></param>
-    /// <param name="duration"></param>
+    /// <param name="duration"></param
     public async Task MoveOneCardToTarget(Card card, Node2D fromNode, Node2D toNode, Vector2 offset = default,
         float duration = 0.4f)
     {
