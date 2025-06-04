@@ -11,7 +11,7 @@ public partial class GameManager : Node2D
     [Export] public float CardSpacing = 50;
     [Export] public float MaxCardSpacing = 200;
 
-    [Export] public int ComPlayerNumber = 3;
+    [Export] public int ComPlayerNumber = 4;
 
     public List<Card> Deck = new();
     public List<Player> Players = new();
@@ -20,14 +20,17 @@ public partial class GameManager : Node2D
     public Area2D DropZoneArea;
     public Node2D DeckPileNode;
     public VBoxContainer PlayerInfoPanel;
-    private readonly List<Label> _playerInfoPanelLabels = new();
-    private readonly List<Label> _playerSeqPanelLabels = new();
+
+    public List<PlayerUI> PlayerUIInfos = new();
+
+    // private readonly List<Label> _playerInfoPanelLabels = new();
+    // private readonly List<Label> _playerSeqPanelLabels = new();
     private Card _hoveredCard = null;
     private Card _draggedCard = null;
 
     private Button _playButton;
     private Button _playButton2;
-    private Node2D _otherPlayer;
+    private Node2D _playerZone;
     private int _currentPlayerIndex = 0;
     private bool _isClockwise = true; // true: 順時針, false: 逆時針
 
@@ -40,19 +43,17 @@ public partial class GameManager : Node2D
     private GameStateMachine _gameStateMachine;
 
 
-
-
     public override async void _Ready()
     {
         // DebugHelper.WaitForDebugger();
 
-        _otherPlayer = GetNode<Node2D>("OtherPlayer");
+        _playerZone = GetNode<Node2D>("PlayerZone");
         DeckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
         PlayerHand = GetNode<Player>("PlayerHand");
-        _playButton = GetNode<Button>("PlayButton");
+        _playButton = GetNode<Button>("UI/PlayButton");
         _playButton.Pressed += onPlayButtonPressed;
 
-        _playButton2 = GetNode<Button>("PlayButton2");
+        _playButton2 = GetNode<Button>("UI/PlayButton2");
         _playButton2.Pressed += onPlayButtonPressed2;
 
 
@@ -122,34 +123,30 @@ public partial class GameManager : Node2D
 
         // 1. 加入玩家（含本地玩家與 COM）
         Players.Clear();
-        Players.Add(PlayerHand);
+        // 清空 UI 面板
+        foreach (var child in PlayerInfoPanel.GetChildren())
+            PlayerInfoPanel.RemoveChild(child);
 
-        for (int i = 1; i < comPlayerNumber + 1; i++)
+        for (int i = 1; i <= comPlayerNumber; i++)
         {
             var playerScence = GD.Load<PackedScene>("res://Scenes/player.tscn");
             var newPlayer = playerScence.Instantiate<Player>();
+            var playerName = $"Player {i}";
             newPlayer.PlayerId = i;
-            newPlayer.Name = $"COM Player {i + 1}";
+            newPlayer.Name = playerName;
             AddChild(newPlayer);
-            await _gameStateMachine.DealingCardsToPlayerAsync(newPlayer, 7,false,false);
+            await _gameStateMachine.DealingCardsToPlayerAsync(newPlayer, 7, false, false);
             Players.Add(newPlayer);
+
+            var playerUIScence = GD.Load<PackedScene>("res://Scenes/player_ui.tscn");
+            var newPlayerUI = playerUIScence.Instantiate<PlayerUI>();
+            PlayerInfoPanel.AddChild(newPlayerUI);
+            newPlayerUI.InitPlayerUI(i, i.ToString(), $"avatar{i}.jpeg", playerName);
         }
 
         // 2. 打亂 _players 順序（遊戲邏輯用）
         var rng = new Random();
         Players = Players.OrderBy(_ => rng.Next()).ToList();
-
-        // 3. 清空 UI 面板
-        _playerInfoPanelLabels.Clear();
-        _playerSeqPanelLabels.Clear();
-        foreach (var child in PlayerInfoPanel.GetChildren())
-            PlayerInfoPanel.RemoveChild(child);
-
-        // 4. 建立 UI（依照打亂順序）
-        for (int i = 0; i < Players.Count; i++)
-        {
-            CreatedPlayerUI(Players[i], i + 1); // 傳入玩家 + 頭像編號
-        }
 
         // 5. 顯示目前玩家
         _currentPlayerIndex = 0;
@@ -157,37 +154,38 @@ public partial class GameManager : Node2D
     }
 
 
-    public void CreatedPlayerUI(Player player, int number)
-    {
-        var hbox = new HBoxContainer();
-
-        var avatar = new TextureRect
-        {
-            Texture = GD.Load<Texture2D>($"res://Assets/Avatars/avatar{number}.jpeg"),
-            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-            StretchMode = TextureRect.StretchModeEnum.Scale,
-            CustomMinimumSize = new Vector2(50, 50),
-            SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter
-        };
-
-        var seqLabel = new Label
-        {
-            Text = "1",
-            Name = player.Name
-        };
-
-        var label = new Label
-        {
-            Text = player.Name,
-            Name = player.Name
-        };
-        hbox.AddChild(seqLabel);
-        hbox.AddChild(avatar);
-        hbox.AddChild(label);
-        _playerSeqPanelLabels.Add(seqLabel);
-        PlayerInfoPanel.AddChild(hbox);
-        _playerInfoPanelLabels.Add(label);
-    }
+    // public void CreatedPlayerUI(Player player, int number)
+    // {
+    //     
+    //     var hbox = new HBoxContainer();
+    //     
+    //     var avatar = new TextureRect
+    //     {
+    //         Texture = GD.Load<Texture2D>($"res://Assets/Avatars/avatar{number}.jpeg"),
+    //         ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+    //         StretchMode = TextureRect.StretchModeEnum.Scale,
+    //         CustomMinimumSize = new Vector2(50, 50),
+    //         SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter
+    //     };
+    //     
+    //     var seqLabel = new Label
+    //     {
+    //         Text = "1",
+    //         Name = player.Name
+    //     };
+    //     
+    //     var label = new Label
+    //     {
+    //         Text = player.Name,
+    //         Name = player.Name
+    //     };
+    //     hbox.AddChild(seqLabel);
+    //     hbox.AddChild(avatar);
+    //     hbox.AddChild(label);
+    //     _playerSeqPanelLabels.Add(seqLabel);
+    //     PlayerInfoPanel.AddChild(hbox);
+    //     _playerInfoPanelLabels.Add(label);
+    // }
 
     public void NextTurn()
     {
@@ -205,12 +203,18 @@ public partial class GameManager : Node2D
 
     public void UpdateCurrentPlayerUI()
     {
-        for (int i = 0; i < _playerInfoPanelLabels.Count; i++)
+        for (int i = 0; i < PlayerUIInfos.Count; i++)
         {
-            _playerSeqPanelLabels[i].Text = $"{i + 1}.";
-            _playerInfoPanelLabels[i]
-                .AddThemeColorOverride("font_color", i == _currentPlayerIndex ? Colors.Yellow : Colors.White);
+            var playerUI = PlayerUIInfos[i];
+            playerUI.SeqNo.Text = $"{i + 1}.";
+            playerUI.PlayerName.AddThemeColorOverride("font_color", i == _currentPlayerIndex ? Colors.Yellow : Colors.White);
         }
+        // for (int i = 0; i < _playerInfoPanelLabels.Count; i++)
+        // {
+        //     _playerSeqPanelLabels[i].Text = $"{i + 1}.";
+        //     _playerInfoPanelLabels[i]
+        //         .AddThemeColorOverride("font_color", i == _currentPlayerIndex ? Colors.Yellow : Colors.White);
+        // }
     }
 
     private void UpdateHoveredCard()
@@ -248,6 +252,7 @@ public partial class GameManager : Node2D
                 }
             }
         }
+
         return topCard;
     }
 
@@ -287,7 +292,8 @@ public partial class GameManager : Node2D
         }
     }
 
-    public Card CreateCard(string cardImgName, CardColor cardColor, CardType cardType, int cardNumber = -1, int zindex = 0)
+    public Card CreateCard(string cardImgName, CardColor cardColor, CardType cardType, int cardNumber = -1,
+        int zindex = 0)
     {
         var cardScence = GD.Load<PackedScene>("res://Scenes/card.tscn");
         var newCard = cardScence.Instantiate<Card>();
@@ -306,7 +312,7 @@ public partial class GameManager : Node2D
     /// <param name="offset"></param>
     /// <param name="duration"></param
     public async Task MoveCardToTarget(Card card, Node2D fromNode, Node2D toNode, Vector2 offset = default,
-        float duration = 0.4f,bool showAnimation = true,bool showCard=true)
+        float duration = 0.4f, bool showAnimation = true, bool showCard = true)
     {
         // 2. 從來源節點移除，加到目的地節點
         if (card.GetParent() == fromNode)
@@ -347,14 +353,15 @@ public partial class GameManager : Node2D
     /// <param name="toNode"></param>
     /// <param name="offset"></param>
     /// <param name="duration"></param>
-    public async Task MoveCardsToTarget(List<Card> deck,int moveNums ,Node2D fromNode, Node2D toNode, Func<int,Vector2> offset ,
-        float duration = 0.4f,bool showAnimation = true,bool showCard=true)
+    public async Task MoveCardsToTarget(List<Card> deck, int moveNums, Node2D fromNode, Node2D toNode,
+        Func<int, Vector2> offset,
+        float duration = 0.4f, bool showAnimation = true, bool showCard = true)
     {
         for (int i = 0; i < moveNums; i++)
         {
             Card card = deck[0];
             deck.RemoveAt(0);
-            await MoveCardToTarget(card,fromNode,toNode,offset(i),duration,showAnimation,showCard);
+            await MoveCardToTarget(card, fromNode, toNode, offset(i), duration, showAnimation, showCard);
         }
     }
 }

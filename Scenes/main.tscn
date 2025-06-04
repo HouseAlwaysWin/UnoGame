@@ -21,30 +21,12 @@ position = Vector2(1135, 130)
 [node name="DropZonePile" parent="." instance=ExtResource("2_bo1nx")]
 position = Vector2(592, 163)
 
-[node name="PlayButton" type="Button" parent="."]
-offset_left = 21.0
-offset_top = 645.0
-offset_right = 89.0
-offset_bottom = 695.0
-theme_override_font_sizes/font_size = 30
-text = "發牌"
-
-[node name="PlayButton2" type="Button" parent="."]
-offset_left = 1.0
-offset_top = 581.0
-offset_right = 129.0
-offset_bottom = 631.0
-theme_override_font_sizes/font_size = 30
-text = "測試"
-
-[node name="OtherPlayer" type="Node2D" parent="."]
+[node name="PlayerZone" type="Node2D" parent="."]
 position = Vector2(88, 328)
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
 
 [node name="PlayerInfoPanel" type="VBoxContainer" parent="UI"]
 layout_mode = 0
@@ -52,6 +34,24 @@ offset_left = 88.0
 offset_top = 24.0
 offset_right = 128.0
 offset_bottom = 64.0
+
+[node name="PlayButton2" type="Button" parent="UI"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 581.0
+offset_right = 129.0
+offset_bottom = 631.0
+theme_override_font_sizes/font_size = 30
+text = "測試"
+
+[node name="PlayButton" type="Button" parent="UI"]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 645.0
+offset_right = 89.0
+offset_bottom = 695.0
+theme_override_font_sizes/font_size = 30
+text = "發牌"
 
 [node name="DirectionArrow" parent="." instance=ExtResource("4_jjvhh")]
 position = Vector2(40, 104)
