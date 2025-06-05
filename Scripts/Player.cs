@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public partial class Player : Node2D
@@ -14,20 +15,22 @@ public partial class Player : Node2D
         _gameManager = GetParent<GameManager>();
     }
 
-    // public void AddCard(Card card)
-    // {
-    //     // card.PlayerId = PlayerId;
-    //     AddChild(card);
-    //     // ReorderHand();
-    // }
+    public List<Card> GetPlayerHandCards()
+    {
+        var handCards = this.GetChildren().Where(c => c is Card).Cast<Card>().ToList();
+        return handCards;
+        // var handCards = new List<Card>();
+        // foreach (var child in this.GetChildren())
+        // {
+        //     if (child is Card card)
+        //     {
+        //         handCards.Add(card);
+        //     }
+        // }
+        // return handCards;
+    }
 
-    // public void RemoveCard(Card card)
-    // {
-    //     RemoveChild(card);
-    //     // ReorderHand();
-    // }
-
-    public void SetAllCardsInteractive(bool interactive)
+    public void SetHandCardsInteractive(bool interactive)
     {
         foreach (var child in this.GetChildren())
         {

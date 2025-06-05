@@ -41,13 +41,13 @@ public partial class GameStateMachine : Node
                 break;
 
             case GameState.DealCards:
-                await _gameManager.InitPlayerAndUIAsync();
                 await _gameManager.DealBeginCard();
-                await _gameManager.MoveCardsToTarget(_gameManager.Deck, 7, _gameManager.DeckPileNode,
-                    _gameManager.PlayerHand,
-                    (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); });
+                await _gameManager.InitPlayerAndUIAsync();
+                // await _gameManager.MoveCardsToTarget(_gameManager.Deck, 7, _gameManager.DeckPileNode,
+                //     _gameManager.PlayerHand,
+                //     offset: (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); });
                 // await DealingCardsToPlayerAsync(_gameManager.PlayerHand, 7);
-                _gameManager.PlayerHand.SetAllCardsInteractive(true);
+                // _gameManager.PlayerHand.SetHandCardsInteractive(true);
                 ChangeState(GameState.WaitForPlayerAction);
                 break;
 
@@ -142,7 +142,7 @@ public partial class GameStateMachine : Node
         bool showCard = true)
     {
         await _gameManager.MoveCardsToTarget(_gameManager.Deck, dealNum, _gameManager.DeckPileNode, playerHand,
-            (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); }, showAnimation: showAnimation,
+            offset: (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); }, showAnimation: showAnimation,
             showCard: showCard);
     }
 
