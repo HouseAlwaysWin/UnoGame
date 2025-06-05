@@ -32,6 +32,7 @@ public partial class GameManager : Node2D
 
     private Button _playButton;
     private Button _playButton2;
+    private Button _playButton3;
     private Node2D _playerZone;
     private int _currentPlayerIndex = 0;
     private bool _isClockwise = true; // true: 順時針, false: 逆時針
@@ -58,6 +59,8 @@ public partial class GameManager : Node2D
         _playButton2 = GetNode<Button>("UI/PlayButton2");
         _playButton2.Pressed += onPlayButtonPressed2;
 
+        _playButton3 = GetNode<Button>("UI/PlayButton3");
+        _playButton3.Pressed += onPlayButtonPressed3;
 
         _directionArrow = GetNode<Node2D>("DirectionArrow");
         _directionArrow.RotationDegrees = 90;
@@ -80,6 +83,7 @@ public partial class GameManager : Node2D
         if (Deck.Count > 7)
         {
             await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayerHand);
+            CurrentPlayerHand.SetHandCardsInteractive(true);
             await CurrentPlayerHand.ReorderHand();
         }
     }
@@ -88,6 +92,11 @@ public partial class GameManager : Node2D
     {
         // ReverseDirection();
         NextTurn();
+    }
+
+    private async void onPlayButtonPressed3()
+    {
+        await ReverseDirection();
     }
 
     public override void _Process(double delta)
