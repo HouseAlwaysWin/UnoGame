@@ -26,8 +26,7 @@ public enum CardType
 
 public partial class Card : Area2D
 {
-    [ExportGroup("Card Information")]
-    [Export]
+    [ExportGroup("Card Information")] [Export]
     public Vector2 CardSize = new Vector2(100, 150);
 
     [Export] public CardType CardType;
@@ -39,7 +38,7 @@ public partial class Card : Area2D
     // [Export] public bool IsInDeck = false;
     public bool IsInteractive = false; // 預設不可互動
 
-    public Player PlayerHand;
+    // public Player PlayerHand;
     public Vector2 OriginalPosition;
     public string DropZonePath;
     public bool IsSelected = false;
@@ -187,12 +186,13 @@ public partial class Card : Area2D
                 if (dropZoneRect.HasPoint(GlobalPosition) && dropZoneTopCard.IsPlayable(this))
                 {
                     IsInteractive = false;
-
+                    var playerHand = this.GetParent<Player>();
                     // PlayerHand.RemoveCard(this);
-                    PlayerHand.RemoveChild(this);
+                    playerHand.RemoveChild(this);
                     _dropZoneNode.AddChild(this);
                     Position = _dropZoneNode.ToLocal(dropZonePos);
-                    await PlayerHand.ReorderHand();
+                    // await _gameManager.MoveCardToTarget(this, playerHand, _gameManager.DropZonePileNode, showAnimation: false);
+                    await playerHand.ReorderHand();
 
                     GD.Print("Card dropped in valid zone");
                     return;
@@ -225,7 +225,7 @@ public partial class Card : Area2D
         CardType? cardType = null,
         string dropZonePath = null, int cardNumber = -1)
     {
-        PlayerHand = playerHand;
+        // PlayerHand = playerHand;
         CardImage = GetNode<Sprite2D>("CardImage");
         var cardImg = string.IsNullOrEmpty(cardImgName) ? "deck" : cardImgName;
         if (CardImage != null)

@@ -346,8 +346,8 @@ public partial class GameManager : Node2D
     Vector2 offset = default)
     {
         // 2. 從來源節點移除，加到目的地節點
-        if (card.GetParent() == fromNode)
-            fromNode?.RemoveChild(card);
+        card.GetParent<Node2D>()?.RemoveChild(card);
+        
         toNode.AddChild(card);
 
         // 3. 將卡片位置設定為原本 global 位置（在新 parent 下）
@@ -392,7 +392,7 @@ bool showAnimation = true, bool showCard = true, float duration = 0.4f,
         {
             Card card = deck.FirstOrDefault();
             if (card == null) break;
-            card.PlayerHand = CurrentPlayerHand; // 設定玩家手牌
+            // card.PlayerHand = CurrentPlayerHand; // 設定玩家手牌
             deck.RemoveAt(0);
             var offsetValue = offset != null ? offset(i) : new Vector2(i * CardSpacing, 0);
             await MoveCardToTarget(card, fromNode, toNode, showAnimation, showCard, duration, offsetValue);
