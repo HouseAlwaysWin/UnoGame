@@ -221,7 +221,7 @@ public partial class Card : Area2D
         return CardColor == topCard.CardColor || (CardType == topCard.CardType && Number == topCard.Number);
     }
 
-    public void InstantiateCard(Player playerHand, string cardImgName = "", CardColor? cardColor = null,
+    public void InstantiateCard(Player playerHand = null, string cardImgName = "", CardColor? cardColor = null,
         CardType? cardType = null,
         string dropZonePath = null, int cardNumber = -1)
     {

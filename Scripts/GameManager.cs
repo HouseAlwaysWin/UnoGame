@@ -15,7 +15,7 @@ public partial class GameManager : Node2D
 
     public List<Card> Deck = new();
     public List<Player> Players = new();
-    public Player PlayerHand;
+    public Node2D PlayerHandZone;
     public int CurrentPlayerHandId = 1;
     public Player CurrentPlayerHand => Players.FirstOrDefault(p => p.PlayerId == CurrentPlayerHandId); // 當前玩家手牌的 PlayerId
     public Node2D DropZonePileNode;
@@ -51,7 +51,7 @@ public partial class GameManager : Node2D
 
         _playerZone = GetNode<Node2D>("PlayerZone");
         DeckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
-        PlayerHand = GetNode<Player>("PlayerHand");
+        PlayerHandZone = GetNode<Node2D>("PlayerHandZone");
         _playButton = GetNode<Button>("UI/PlayButton");
         _playButton.Pressed += onPlayButtonPressed;
 
@@ -73,6 +73,23 @@ public partial class GameManager : Node2D
         _gameStateMachine.ChangeState(GameState.DealCards);
     }
 
+
+    private async void onPlayButtonPressed()
+    {
+        GD.Print(Deck.Count);
+        if (Deck.Count > 7)
+        {
+            await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayerHand);
+            await CurrentPlayerHand.ReorderHand();
+        }
+    }
+
+    private void onPlayButtonPressed2()
+    {
+        // ReverseDirection();
+        NextTurn();
+    }
+
     public override void _Process(double delta)
     {
         if (_draggedCard == null)
@@ -89,11 +106,7 @@ public partial class GameManager : Node2D
     }
 
 
-    private void onPlayButtonPressed2()
-    {
-        // ReverseDirection();
-        NextTurn();
-    }
+
 
     public async Task ReverseDirection()
     {
@@ -140,7 +153,7 @@ public partial class GameManager : Node2D
             if (i == currPlayerHandId)
             {
                 // await _gameStateMachine.DealingCardsToPlayerAsync(PlayerHand, 7, true, true);
-                newPlayer.GlobalPosition = PlayerHand.GlobalPosition;
+                newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition;
             }
             else
             {
@@ -299,23 +312,13 @@ public partial class GameManager : Node2D
     }
 
 
-    private async void onPlayButtonPressed()
-    {
-        GD.Print(Deck.Count);
-        if (Deck.Count > 7)
-        {
-            await _gameStateMachine.DealingCardsToPlayerAsync(PlayerHand);
-            await PlayerHand.ReorderHand();
-            // PlayerHand.SetAllCardsInteractive(true);
-        }
-    }
 
     public Card CreateCard(string cardImgName, CardColor cardColor, CardType cardType, int cardNumber = -1,
         int zindex = 0)
     {
         var cardScence = GD.Load<PackedScene>("res://Scenes/card.tscn");
         var newCard = cardScence.Instantiate<Card>();
-        newCard.InstantiateCard(PlayerHand, cardImgName, cardColor, cardType, DropZonePileNode.GetPath(), cardNumber);
+        newCard.InstantiateCard(null, cardImgName, cardColor, cardType, DropZonePileNode.GetPath(), cardNumber);
         newCard.Name = $"{cardColor}{cardType}{cardNumber}";
         newCard.ZIndex = zindex;
         return newCard;

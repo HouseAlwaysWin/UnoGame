@@ -12,8 +12,9 @@ CardsToDeal = 1
 CardSpacing = 80.0
 MaxCardSpacing = 500.0
 
-[node name="PlayerHand" parent="." instance=ExtResource("2_8gbba")]
+[node name="PlayerHandZone" parent="." instance=ExtResource("2_8gbba")]
 position = Vector2(360, 544)
+script = null
 
 [node name="DeckPile" type="Node2D" parent="."]
 position = Vector2(1135, 130)
