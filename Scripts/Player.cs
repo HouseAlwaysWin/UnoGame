@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 public partial class Player : Node2D
 {
-    public int PlayerId;
+    public int PlayerSeqNo;
+    public string PlayerId;
     private GameManager _gameManager;
     public Tween ReorderHandeTween;
 

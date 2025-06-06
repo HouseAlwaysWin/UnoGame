@@ -3,18 +3,18 @@ using System;
 
 public partial class PlayerUI : HBoxContainer
 {
-    public int PlayerId;
+    public string PlayerId;
     public Label SeqNo;
     public TextureRect PlayerImg;
     public Label PlayerName;
     public override void _Ready()
     {
-        SeqNo = GetNode<Label>("SeqNo"); 
+        SeqNo = GetNode<Label>("SeqNo");
         PlayerImg = GetNode<TextureRect>("PlayerImg");
         PlayerName = GetNode<Label>("PlayerName");
     }
 
-    public void InitPlayerUI(int playerId, string seqNo, string avatar, string name)
+    public void InitPlayerUI(string playerId, string seqNo, string avatar, string name)
     {
         PlayerId = playerId;
         SeqNo.Text = seqNo;

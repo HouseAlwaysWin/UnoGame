@@ -26,7 +26,8 @@ public enum CardType
 
 public partial class Card : Area2D
 {
-    [ExportGroup("Card Information")] [Export]
+    [ExportGroup("Card Information")]
+    [Export]
     public Vector2 CardSize = new Vector2(100, 150);
 
     [Export] public CardType CardType;
@@ -40,7 +41,7 @@ public partial class Card : Area2D
 
     // public Player PlayerHand;
     public Vector2 OriginalPosition;
-    public string DropZonePath;
+    // public string DropZonePath;
     public bool IsSelected = false;
     public int OriginalZIndex;
 
@@ -53,7 +54,7 @@ public partial class Card : Area2D
 
     public bool IsDragging = false;
     private Vector2 _dragOffset;
-    private Area2D _dropZone;
+    private Area2D _dropZoneArea;
     private Node2D _dropZoneNode;
     private string CardImgName;
     private static int _globalZCounter = 1000;
@@ -71,12 +72,13 @@ public partial class Card : Area2D
         AddToGroup("card");
         _gameManager = GetParent().GetParent<GameManager>();
         _animator = GetNode<CardAnimator>("CardAnimator");
-
-        if (!string.IsNullOrWhiteSpace(DropZonePath))
-        {
-            _dropZoneNode = GetNode<Node2D>(DropZonePath);
-            _dropZone = _dropZoneNode.GetNode<Area2D>("Area2D");
-        }
+        _dropZoneNode = _gameManager.DropZonePileNode;
+        _dropZoneArea = _gameManager.DropZoneArea;
+        // if (!string.IsNullOrWhiteSpace(DropZonePath))
+        // {
+        //     _dropZoneNode = GetNode<Node2D>(DropZonePath);
+        //     _dropZoneArea = _dropZoneNode.GetNode<Area2D>("Area2D");
+        // }
 
         OriginalZIndex = ZIndex;
     }
@@ -171,12 +173,12 @@ public partial class Card : Area2D
 
     private async void HandleDrop()
     {
-        if (_dropZone != null)
+        if (_dropZoneArea != null)
         {
-            var shapeNode = _dropZone.GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
+            var shapeNode = _dropZoneArea.GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
             if (shapeNode != null && shapeNode.Shape is RectangleShape2D rectShape)
             {
-                var dropZonePos = _dropZone.GlobalPosition;
+                var dropZonePos = _dropZoneArea.GlobalPosition;
                 var dropSize = rectShape.Size;
                 var halfSize = dropSize / 2;
 
@@ -188,10 +190,10 @@ public partial class Card : Area2D
                     IsInteractive = false;
                     var playerHand = this.GetParent<Player>();
                     // PlayerHand.RemoveCard(this);
-                    playerHand.RemoveChild(this);
-                    _dropZoneNode.AddChild(this);
-                    Position = _dropZoneNode.ToLocal(dropZonePos);
-                    // await _gameManager.MoveCardToTarget(this, playerHand, _gameManager.DropZonePileNode, showAnimation: false);
+                    // playerHand.RemoveChild(this);
+                    // _dropZoneNode.AddChild(this);
+                    // Position = _dropZoneNode.ToLocal(dropZonePos);
+                    await _gameManager.MoveCardToTarget(this, playerHand, _gameManager.DropZonePileNode, showAnimation: false);
                     await playerHand.ReorderHand();
 
                     GD.Print("Card dropped in valid zone");
@@ -221,9 +223,8 @@ public partial class Card : Area2D
         return CardColor == topCard.CardColor || (CardType == topCard.CardType && Number == topCard.Number);
     }
 
-    public void InstantiateCard(Player playerHand = null, string cardImgName = "", CardColor? cardColor = null,
-        CardType? cardType = null,
-        string dropZonePath = null, int cardNumber = -1)
+    public void InstantiateCard(string cardImgName = "", CardColor? cardColor = null,
+        CardType? cardType = null, int cardNumber = -1)
     {
         // PlayerHand = playerHand;
         CardImage = GetNode<Sprite2D>("CardImage");
@@ -240,7 +241,7 @@ public partial class Card : Area2D
                 CardSize.X / textureSize.X,
                 CardSize.Y / textureSize.Y
             );
-            DropZonePath = dropZonePath;
+            // DropZonePath = dropZonePath;
         }
     }
 }
