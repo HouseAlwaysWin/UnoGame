@@ -16,8 +16,16 @@ public partial class GameManager : Node2D
     public List<Card> Deck = new();
     public List<Player> Players = new();
     public Node2D PlayerHandZone;
-    public string CurrentPlayerHandId = "Player 1"; // 當前玩家手牌的 PlayerId
-    public Player CurrentPlayerHand => Players.FirstOrDefault(p => p.PlayerSeqNo == _currentPlayerIndex); // 當前玩家手牌的 PlayerId
+    public CardColor CurrentCardColor;
+    public string CurrentPlayerId = "Player 1"; // 當前玩家手牌的 PlayerId
+
+    public Player CurrentPlayer =>
+        Players.FirstOrDefault(p => p.PlayerSeqNo == _currentPlayerIndex); // 當前玩家手牌的 PlayerId
+    public Player NextPlayer =>
+        Players.FirstOrDefault(p => p.PlayerSeqNo == (_isClockwise ? 
+            (_currentPlayerIndex + 1) % Players.Count:(_currentPlayerIndex - 1)+ Players.Count% Players.Count)); // 當前玩家手牌的 PlayerId
+ 
+
     public Node2D DropZonePileNode;
     public Area2D DropZoneArea;
     public Node2D DeckPileNode;
@@ -34,6 +42,10 @@ public partial class GameManager : Node2D
     private Button _playButton2;
     private Button _playButton3;
     private Button _playButton4;
+    private Button _playButton5;
+    private Button _playButton6;
+    private Button _playButton7;
+
     private Node2D _playerZone;
     private int _currentPlayerIndex = 0;
     private bool _isClockwise = true; // true: 順時針, false: 逆時針
@@ -54,17 +66,26 @@ public partial class GameManager : Node2D
         _playerZone = GetNode<Node2D>("PlayerZone");
         DeckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
         PlayerHandZone = GetNode<Node2D>("PlayerHandZone");
-        _playButton = GetNode<Button>("UI/PlayButton");
+        _playButton = GetNode<Button>("UI/TestButton/PlayButton");
         _playButton.Pressed += onPlayButtonPressed;
 
-        _playButton2 = GetNode<Button>("UI/PlayButton2");
+        _playButton2 = GetNode<Button>("UI/TestButton/PlayButton2");
         _playButton2.Pressed += onPlayButtonPressed2;
 
-        _playButton3 = GetNode<Button>("UI/PlayButton3");
+        _playButton3 = GetNode<Button>("UI/TestButton/PlayButton3");
         _playButton3.Pressed += onPlayButtonPressed3;
 
-        _playButton4 = GetNode<Button>("UI/PlayButton4");
+        _playButton4 = GetNode<Button>("UI/TestButton/PlayButton4");
         _playButton4.Pressed += onPlayButtonPressed4;
+
+        _playButton5 = GetNode<Button>("UI/TestButton/PlayButton5");
+        _playButton5.Pressed += onPlayButtonPressed5;
+        
+        _playButton6 = GetNode<Button>("UI/TestButton/PlayButton6");
+        _playButton6.Pressed += onPlayButtonPressed6;
+        
+        _playButton7 = GetNode<Button>("UI/TestButton/PlayButton7");
+        _playButton7.Pressed += onPlayButtonPressed7;
 
         _directionArrow = GetNode<Node2D>("DirectionArrow");
         _directionArrow.RotationDegrees = 90;
@@ -98,16 +119,43 @@ public partial class GameManager : Node2D
 
     private async void onPlayButtonPressed4()
     {
+        // CurrentPlayerHand.ShowHandCards(true);
 
+        Card firstCard = CurrentPlayer.GetPlayerHandCards().FirstOrDefault();
+        await MoveCardToTarget(firstCard, _playerZone, DropZonePileNode, showCard: true);
     }
 
+    private bool _showAllCars = false;
+
+    private async void onPlayButtonPressed5()
+    {
+        _showAllCars = !_showAllCars;
+        foreach (var player in Players)
+        {
+            if (player == CurrentPlayer)
+            {
+                player.ShowHandCards(_showAllCars);
+            }
+        }
+    }
+
+    private async void onPlayButtonPressed6()
+    {
+        NextTurn(2);
+    }
+    
+    private async void onPlayButtonPressed7()
+    {
+        await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 4);
+        await NextPlayer.ReorderHand();
+    }
+    
     public async void OnPassed()
     {
-        await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayerHand);
-        CurrentPlayerHand.SetHandCardsInteractive(true);
-        await CurrentPlayerHand.ReorderHand();
+        await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer);
+        CurrentPlayer.SetHandCardsInteractive(true);
+        await CurrentPlayer.ReorderHand();
     }
-
 
 
     public override void _Process(double delta)
@@ -124,8 +172,6 @@ public partial class GameManager : Node2D
         Deck.RemoveAt(0);
         await MoveCardToTarget(card, DeckPileNode, DropZonePileNode);
     }
-
-
 
 
     public async Task ReverseDirection()
@@ -155,7 +201,6 @@ public partial class GameManager : Node2D
 
         for (int i = 1; i <= comPlayerNumber; i++)
         {
-
             var playerName = $"Player {i}";
             //   設定Player UI
             var playerUIScence = GD.Load<PackedScene>("res://Scenes/player_ui.tscn");
@@ -171,18 +216,27 @@ public partial class GameManager : Node2D
             newPlayer.PlayerSeqNo = i - 1; // 玩家序號從 0 開始
             newPlayer.PlayerId = playerName;
             newPlayer.Name = playerName;
-            if (newPlayer.PlayerId == CurrentPlayerHandId)
+            // if (newPlayer.PlayerId == CurrentPlayerHandId)
+            // {
+            //     newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition;
+            // }
+            // else
+            // {
+            // newPlayer.GlobalPosition = _playerZone.GlobalPosition + new Vector2(0, i * -150);
+            // newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition + new Vector2(0, i * -150);
+
+            newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition;
+            if (newPlayer.PlayerId != CurrentPlayerId)
             {
-                // await _gameStateMachine.DealingCardsToPlayerAsync(PlayerHand, 7, true, true);
-                newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition;
+                await _gameStateMachine.DealingCardsToPlayerAsync(newPlayer, 7, false, false);
             }
             else
             {
-                newPlayer.GlobalPosition = _playerZone.GlobalPosition + new Vector2(0, i * -150);
                 await _gameStateMachine.DealingCardsToPlayerAsync(newPlayer, 7, true, true);
             }
-            Players.Add(newPlayer);
 
+            // }
+            Players.Add(newPlayer);
         }
 
         _currentPlayerIndex = 0;
@@ -191,27 +245,25 @@ public partial class GameManager : Node2D
         // 2. 打亂 _players 順序（遊戲邏輯用）
         // var rng = new Random();
         // Players = Players.OrderBy(_ => rng.Next()).ToList();
-        var player = Players.FirstOrDefault(p => p.PlayerId == CurrentPlayerHandId);
-        await _gameStateMachine.DealingCardsToPlayerAsync(player, 7);
+        // var player = Players.FirstOrDefault(p => p.PlayerId == CurrentPlayerHandId);
+        // await _gameStateMachine.DealingCardsToPlayerAsync(player, 7);
         SetCurrentPlayerHandActive();
     }
 
-    public void NextTurn()
+    public void NextTurn(int skip = 1)
     {
         if (_isClockwise)
         {
-            _currentPlayerIndex = (_currentPlayerIndex + 1) % Players.Count;
+            _currentPlayerIndex = (_currentPlayerIndex + skip) % Players.Count;
         }
         else
         {
-            _currentPlayerIndex = (_currentPlayerIndex - 1 + Players.Count) % Players.Count;
+            _currentPlayerIndex = (_currentPlayerIndex - skip + Players.Count) % Players.Count;
         }
 
         UpdateCurrentPlayerUI();
         SetCurrentPlayerHandActive();
     }
-
-
 
     public void UpdateCurrentPlayerUI()
     {
@@ -219,9 +271,9 @@ public partial class GameManager : Node2D
         {
             var playerUI = PlayerUIInfos[i];
             playerUI.SeqNo.Text = $"{i + 1}.";
-            playerUI.PlayerName.AddThemeColorOverride("font_color", i == _currentPlayerIndex ? Colors.Yellow : Colors.White);
+            playerUI.PlayerName.AddThemeColorOverride("font_color",
+                i == _currentPlayerIndex ? Colors.Yellow : Colors.White);
         }
-
     }
 
     public void SetCurrentPlayerHandActive()
@@ -304,7 +356,6 @@ public partial class GameManager : Node2D
     }
 
 
-
     public Card CreateCard(string cardImgName, CardColor cardColor, CardType cardType, int cardNumber = -1,
         int zindex = 0)
     {
@@ -325,11 +376,12 @@ public partial class GameManager : Node2D
     /// <param name="offset"></param>
     /// <param name="duration"></param
     public async Task MoveCardToTarget(Card card, Node2D fromNode, Node2D toNode,
-     bool showAnimation = true, bool showCard = true, float duration = 0.4f,
-    Vector2 offset = default)
+        bool showAnimation = true, bool showCard = true, float duration = 0.4f,
+        Vector2 offset = default)
     {
-        // 2. 從來源節點移除，加到目的地節點
+        // 從來源節點移除，加到目的地節點
         card.GetParent<Node2D>()?.RemoveChild(card);
+        card.Visible = showCard;
 
         toNode.AddChild(card);
 
@@ -352,11 +404,6 @@ public partial class GameManager : Node2D
 
         card.OriginalPosition = targetGlobal;
         card.GlobalPosition = targetGlobal;
-
-        if (!showCard)
-        {
-            card.Hide();
-        }
     }
 
     /// <summary>
@@ -369,9 +416,9 @@ public partial class GameManager : Node2D
     /// <param name="offset"></param>
     /// <param name="duration"></param>
     public async Task MoveCardsToTarget(List<Card> deck, int moveNums, Node2D fromNode, Node2D toNode,
-bool showAnimation = true, bool showCard = true, float duration = 0.4f,
+        bool showAnimation = true, bool showCard = true, float duration = 0.4f,
         Func<int, Vector2> offset = null
-         )
+    )
     {
         for (int i = 0; i < moveNums; i++)
         {

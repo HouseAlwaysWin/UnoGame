@@ -20,15 +20,14 @@ public partial class Player : Node2D
     {
         var handCards = this.GetChildren().Where(c => c is Card).Cast<Card>().ToList();
         return handCards;
-        // var handCards = new List<Card>();
-        // foreach (var child in this.GetChildren())
-        // {
-        //     if (child is Card card)
-        //     {
-        //         handCards.Add(card);
-        //     }
-        // }
-        // return handCards;
+    }
+
+    public void ShowHandCards(bool show)
+    {
+        foreach (var card in GetPlayerHandCards())
+        {
+            card.Visible = show;
+        }
     }
 
     public void SetHandCardsInteractive(bool interactive)

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bhsixk7jaxc6o" path="res://Scripts/GameManager.cs" id="1_bo1nx"]
 [ext_resource type="PackedScene" uid="uid://uodlgyfqonj5" path="res://Scenes/player.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://c86x7vo8htqv7" path="res://Scenes/drop_zone.tscn" id="2_bo1nx"]
-[ext_resource type="PackedScene" path="res://Scenes/direction_arrow.tscn" id="4_jjvhh"]
+[ext_resource type="PackedScene" uid="uid://bqc6j50tq72ju" path="res://Scenes/direction_arrow.tscn" id="4_jjvhh"]
 [ext_resource type="PackedScene" uid="uid://swttoeppx8s" path="res://Scenes/game_state_machine.tscn" id="5_kry3j"]
 
 [node name="Main" type="Node2D"]
@@ -13,7 +13,7 @@ CardSpacing = 80.0
 MaxCardSpacing = 500.0
 
 [node name="PlayerHandZone" parent="." instance=ExtResource("2_8gbba")]
-position = Vector2(359, 698)
+position = Vector2(360, 608)
 script = null
 
 [node name="DeckPile" type="Node2D" parent="."]
@@ -23,7 +23,7 @@ position = Vector2(1135, 130)
 position = Vector2(592, 163)
 
 [node name="PlayerZone" type="Node2D" parent="."]
-position = Vector2(683, 891)
+position = Vector2(576, -240)
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3
@@ -36,41 +36,47 @@ offset_top = 24.0
 offset_right = 128.0
 offset_bottom = 64.0
 
-[node name="PlayButton2" type="Button" parent="UI"]
+[node name="TestButton" type="VBoxContainer" parent="UI"]
 layout_mode = 0
-offset_left = 1.0
-offset_top = 602.0
-offset_right = 129.0
-offset_bottom = 652.0
+offset_left = 1144.0
+offset_top = 288.0
+offset_right = 1272.0
+offset_bottom = 608.0
+
+[node name="PlayButton2" type="Button" parent="UI/TestButton"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "下輪"
 
-[node name="PlayButton" type="Button" parent="UI"]
-layout_mode = 0
-offset_left = 2.0
-offset_top = 543.0
-offset_right = 129.0
-offset_bottom = 593.0
+[node name="PlayButton" type="Button" parent="UI/TestButton"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "發牌"
 
-[node name="PlayButton3" type="Button" parent="UI"]
-layout_mode = 0
-offset_left = 4.0
-offset_top = 657.0
-offset_right = 131.0
-offset_bottom = 707.0
+[node name="PlayButton3" type="Button" parent="UI/TestButton"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 30
-text = "箭頭"
+text = "轉向"
 
-[node name="PlayButton4" type="Button" parent="UI"]
-layout_mode = 0
-offset_left = 4.0
-offset_top = 710.0
-offset_right = 131.0
-offset_bottom = 760.0
+[node name="PlayButton4" type="Button" parent="UI/TestButton"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "出牌"
+
+[node name="PlayButton5" type="Button" parent="UI/TestButton"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "顯示卡牌"
+
+[node name="PlayButton6" type="Button" parent="UI/TestButton"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "跳過"
+
+[node name="PlayButton7" type="Button" parent="UI/TestButton"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Wild +4"
 
 [node name="DirectionArrow" parent="." instance=ExtResource("4_jjvhh")]
 position = Vector2(40, 104)
