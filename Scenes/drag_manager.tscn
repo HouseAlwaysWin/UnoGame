@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://becl8hfexr5l6"]
+
+[ext_resource type="Script" uid="uid://dhk422suhagna" path="res://Scripts/DargManager.cs" id="1_kryms"]
+
+[node name="DragManager" type="Node2D"]
+script = ExtResource("1_kryms")

@@ -1,17 +1,20 @@
-[gd_scene load_steps=2 format=3 uid="uid://c86x7vo8htqv7"]
+[gd_scene load_steps=3 format=3 uid="uid://c86x7vo8htqv7"]
+
+[ext_resource type="Script" uid="uid://dot0dkjhvboml" path="res://Scripts/DropZone.cs" id="1_tcq6s"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ua3eg"]
 size = Vector2(150, 100)
 
 [node name="DropZone" type="Node2D"]
+script = ExtResource("1_tcq6s")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="DropZoneArea" type="Area2D" parent="."]
 rotation = 1.5708
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DropZoneArea"]
 shape = SubResource("RectangleShape2D_ua3eg")
 
-[node name="ColorRect" type="ColorRect" parent="Area2D"]
+[node name="ColorRect" type="ColorRect" parent="DropZoneArea"]
 z_index = -1
 anchors_preset = 8
 anchor_left = 0.5

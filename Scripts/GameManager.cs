@@ -57,12 +57,15 @@ public partial class GameManager : Node2D
 
     private Card _currentTopCard; // 新增
     private GameStateMachine _gameStateMachine;
+    private CanvasLayer _wildColorSelector;
 
 
     public override async void _Ready()
     {
         // DebugHelper.WaitForDebugger();
-
+        _wildColorSelector = GetNode<CanvasLayer>("UI/WildColorSelector");
+        _wildColorSelector.Visible = false;
+        
         _playerZone = GetNode<Node2D>("PlayerZone");
         DeckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
         PlayerHandZone = GetNode<Node2D>("PlayerHandZone");
@@ -91,7 +94,7 @@ public partial class GameManager : Node2D
         _directionArrow.RotationDegrees = 90;
         _arrowRotation = 90;
 
-        DropZoneArea = GetNode<Area2D>("DropZonePile/Area2D");
+        DropZoneArea = GetNode<Area2D>("DropZonePile/DropZoneArea");
         DropZonePileNode = GetNode<Node2D>("DropZonePile");
 
         PlayerInfoPanel = GetNode<VBoxContainer>("UI/PlayerInfoPanel");
@@ -433,5 +436,10 @@ public partial class GameManager : Node2D
             var offsetValue = offset != null ? offset(i) : new Vector2(i * CardSpacing, 0);
             await MoveCardToTarget(card, fromNode, toNode, showAnimation, showCard, duration, offsetValue);
         }
+    }
+
+    public bool CanPlaceCard(Card card)
+    {
+        return false;
     }
 }

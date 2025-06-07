@@ -115,7 +115,7 @@ public partial class GameStateMachine : Node
             visualCard.ZIndex = i;
             visualCard.RotationDegrees = GD.Randf() * RotationStep - (RotationStep / 2); // 微旋轉
             visualCard.IsInteractive = false;
-            // visualCard.Modulate = new Color(1, 1, 1, 0.8f); // 透明度微低
+            visualCard.Modulate = new Color(1, 1, 1, 0.8f); // 透明度微低
 
             _gameManager.DeckPileNode.AddChild(visualCard);
         }
@@ -131,11 +131,6 @@ public partial class GameStateMachine : Node
             // 設定階層
             cards[i].ZIndex = i;
         }
-        // 設定階層
-        // for (int i = 0; i < cards.Count - 1; i++)
-        // {
-        //     cards[i].ZIndex = i;
-        // }
     }
 
     public async Task DealingCardsToPlayerAsync(Player? playerHand = null, int dealNum = 1, bool showAnimation = true,
@@ -145,52 +140,8 @@ public partial class GameStateMachine : Node
             offset: (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); }, showAnimation: showAnimation,
             showCard: showCard);
     }
+    
+    
+    // public void Card
 
-    // public async Task DealingCardsToPlayerAsync(Player? playerHand = null, int? dealNum = null)
-    // {
-    //     Player player = playerHand ?? _gameManager.PlayerHand;
-    //     int cardsToDeal = dealNum ?? _gameManager.CardsToDeal;
-    //     float spacing = _gameManager.CardSpacing;
-    //     float startX = 0;
-    //
-    //     if (_gameManager.Deck.Count < 5) cardsToDeal = _gameManager.Deck.Count;
-    //     var maxCardSpacing = cardsToDeal * spacing;
-    //     if (maxCardSpacing > _gameManager.MaxCardSpacing)
-    //     {
-    //         spacing = _gameManager.MaxCardSpacing / cardsToDeal;
-    //     }
-    //
-    //     for (int i = 0; i < cardsToDeal; i++)
-    //     {
-    //         if (_gameManager.Deck.Count > 0)
-    //         {
-    //             Card card = _gameManager.Deck[0];
-    //             _gameManager.Deck.RemoveAt(0);
-    //
-    //             // Card visualCard = CreateCard($"deck", CardColor.Wild, CardType.Wild); // 顯示用，不影響資料堆
-    //             // GD.Print(card.CardImage.Texture.ResourcePath);
-    //             // AddChild(card);
-    //
-    //             player.AddChild(card);
-    //             if (player != _gameManager.PlayerHand)
-    //             {
-    //                 card.Hide();
-    //             }
-    //             else
-    //             {
-    //                 card.GlobalPosition = _gameManager.DeckPileNode.GlobalPosition;
-    //                 // card.IsInteractive = false;
-    //                 Vector2 targetPos = player.GlobalPosition + new Vector2(startX + i * spacing, 0);
-    //                 card.SetAlwaysOnTop();
-    //                 var tween = CreateTween();
-    //                 tween.TweenProperty(card, "global_position", targetPos, 0.5).SetTrans(Tween.TransitionType.Sine)
-    //                     .SetEase(Tween.EaseType.Out);
-    //                 await ToSignal(tween, "finished");
-    //                 // card.IsInteractive = true;
-    //                 // 紀錄目前位置
-    //                 card.OriginalPosition = targetPos;
-    //             }
-    //         }
-    //     }
-    // }
 }
