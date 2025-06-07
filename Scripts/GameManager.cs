@@ -350,18 +350,18 @@ public partial class GameManager : Node2D
         return _hoveredCard;
     }
 
-    public void SetDraggedCard(Card card)
-    {
-        _draggedCard = card;
-        _hoveredCard?.OnHoverExit(); // 停止 hover 狀態
-        _hoveredCard = null;
-    }
-
-    public void ClearDraggedCard(Card card)
-    {
-        if (_draggedCard == card)
-            _draggedCard = null;
-    }
+    // public void SetDraggedCard(Card card)
+    // {
+    //     _draggedCard = card;
+    //     _hoveredCard?.OnHoverExit(); // 停止 hover 狀態
+    //     _hoveredCard = null;
+    // }
+    //
+    // public void ClearDraggedCard(Card card)
+    // {
+    //     if (_draggedCard == card)
+    //         _draggedCard = null;
+    // }
 
 
     public Card CreateCard(string cardImgName, CardColor cardColor, CardType cardType, int cardNumber = -1,

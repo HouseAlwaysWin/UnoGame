@@ -46,9 +46,12 @@ public partial class Card : Area2D
     public int OriginalZIndex;
 
     private Tween _tween;
-    
-    [Signal] public delegate void DragStartedSignalEventHandler(Card card);
-    [Signal] public delegate void DragEndedSignalEventHandler(Card card);
+
+    [Signal]
+    public delegate void DragStartedSignalEventHandler(Card card);
+
+    [Signal]
+    public delegate void DragEndedSignalEventHandler(Card card);
 
     public bool IsTweenRunning
     {
@@ -66,23 +69,15 @@ public partial class Card : Area2D
     public CardAnimator CardAnimator;
 
     public Vector2 DragOffset { get; private set; }
-    [Signal] public delegate void DragEndedEventHandler(Card card);
 
     public override void _Ready()
     {
         // DebugHelper.WaitForDebugger();
-
         AddToGroup("card");
         _gameManager = GetParent().GetParent<GameManager>();
         CardAnimator = GetNode<CardAnimator>("CardAnimator");
         _dropZoneNode = _gameManager.DropZonePileNode;
         _dropZoneArea = _gameManager.DropZoneArea;
-        // if (!string.IsNullOrWhiteSpace(DropZonePath))
-        // {
-        //     _dropZoneNode = GetNode<Node2D>(DropZonePath);
-        //     _dropZoneArea = _dropZoneNode.GetNode<Area2D>("Area2D");
-        // }
-
         OriginalZIndex = ZIndex;
     }
 
@@ -108,7 +103,7 @@ public partial class Card : Area2D
         await CardAnimator.HoverDown();
     }
 
-    public override async void _InputEvent(Viewport viewport, InputEvent @event, int shapeIdx)
+    public override void _InputEvent(Viewport viewport, InputEvent @event, int shapeIdx)
     {
         if (!IsInteractive)
             return;
@@ -125,30 +120,15 @@ public partial class Card : Area2D
                     _dragOffset = GetGlobalMousePosition() - GlobalPosition;
                     IsDragging = true;
                     EmitSignal(nameof(DragStartedSignal), this);
-                    // _gameManager.SetDraggedCard(this);
                     SetAlwaysOnTop();
                 }
                 else if (!IsTweenRunning && IsDragging)
-                // else if(IsDragging)
                 {
                     // 只有自己是目前拖曳者時才能放開
                     IsDragging = false;
-                    // _gameManager.ClearDraggedCard(this);
                     EmitSignal(nameof(DragEndedSignal), this);
-                    // await _animator.TweenTo(this.OriginalPosition, 0.2f);
-                    // ReturnToOriginalZ();
-                    // await Task.Delay(100); // 微延遲防止立即觸發 Hover
-                    // IsInteractive = true;
-                    // HandleDrop();
+  
                 }
-                // else
-                // {
-                //     GD.Print("Card dropped outside zone, returning");
-                //     await _animator.TweenTo(this.OriginalPosition, 0.2f);
-                //     ReturnToOriginalZ();
-                //     await Task.Delay(100); // 微延遲防止立即觸發 Hover
-                //     IsInteractive = true;
-                // }
             }
         }
     }
@@ -163,81 +143,6 @@ public partial class Card : Area2D
     public void ReturnToOriginalZ()
     {
         ZIndex = OriginalZIndex;
-    }
-
-    public Card GetTopCardInDropZone(Node dropZoneNode)
-    {
-        Card topCard = null;
-        int maxZ = int.MinValue;
-    
-        foreach (var child in dropZoneNode.GetChildren())
-        {
-            if (child is Card card)
-            {
-                if (card.ZIndex > maxZ)
-                {
-                    maxZ = card.ZIndex;
-                    topCard = card;
-                }
-            }
-        }
-    
-        return topCard;
-    }
-
-    private async void HandleDrop()
-    {
-        // if (_dropZoneArea != null)
-        // {
-        //     var shapeNode = _dropZoneArea.GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
-        //     if (shapeNode != null && shapeNode.Shape is RectangleShape2D rectShape)
-        //     {
-        //         var dropZonePos = _dropZoneArea.GlobalPosition;
-        //         var dropSize = rectShape.Size;
-        //         var halfSize = dropSize / 2;
-        //
-        //         var dropZoneRect = new Rect2(dropZonePos - halfSize, dropSize);
-        //         var dropZoneTopCard = GetTopCardInDropZone(_dropZoneNode);
-        //
-        //         if (dropZoneRect.HasPoint(GlobalPosition) && dropZoneTopCard.IsPlayable(this))
-        //         {
-        //             IsInteractive = false;
-        //             // PlayerHand.RemoveCard(this);
-        //             // playerHand.RemoveChild(this);
-        //             // _dropZoneNode.AddChild(this);
-        //             // Position = _dropZoneNode.ToLocal(dropZonePos);
-        //
-        //             var playerHand = this.GetParentOrNull<Player>();
-        //             if (playerHand == null) return;
-        //             await _gameManager.MoveCardToTarget(this, playerHand, _gameManager.DropZonePileNode,
-        //                 showAnimation: false);
-        //             await playerHand.ReorderHand();
-        //
-        //             GD.Print("Card dropped in valid zone");
-        //             return;
-        //         }
-        //     }
-        // }
-    
-        // 沒有放到正確區域：回原位、ZIndex 還原
-        GD.Print("Card dropped outside zone, returning");
-        await CardAnimator.TweenTo(this.OriginalPosition, 0.2f);
-        ReturnToOriginalZ();
-        await Task.Delay(100); // 微延遲防止立即觸發 Hover
-        IsInteractive = true;
-    }
-
-    // private void ToggleSelection()
-    // {
-    //     IsSelected = !IsSelected;
-    //     Position = IsSelected ? OriginalPosition + new Vector2(0, -20) : OriginalPosition;
-    // }
-
-    public bool IsPlayable(Card topCard)
-    {
-        if (CardColor == CardColor.Wild || topCard.CardColor == CardColor.Wild)
-            return true;
-        return CardColor == topCard.CardColor || (CardType == topCard.CardType && Number == topCard.Number);
     }
 
     public void InstantiateCard(string cardImgName = "", CardColor? cardColor = null,
