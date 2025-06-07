@@ -198,17 +198,23 @@ public partial class GameManager : Node2D
         // 清空 UI 面板
         foreach (var child in PlayerInfoPanel.GetChildren())
             PlayerInfoPanel.RemoveChild(child);
-
+        
         for (int i = 1; i <= comPlayerNumber; i++)
         {
             var playerName = $"Player {i}";
+
             //   設定Player UI
             var playerUIScence = GD.Load<PackedScene>("res://Scenes/player_ui.tscn");
             var newPlayerUI = playerUIScence.Instantiate<PlayerUI>();
             PlayerInfoPanel.AddChild(newPlayerUI);
             newPlayerUI.InitPlayerUI(playerName, i.ToString(), $"avatar{i}.jpeg", playerName);
             PlayerUIInfos.Add(newPlayerUI);
-
+        }
+        UpdateCurrentPlayerUI();
+        
+        for (int i = 1; i <= comPlayerNumber; i++)
+        {
+            var playerName = $"Player {i}";
             //  建立 Player 實體
             var playerScence = GD.Load<PackedScene>("res://Scenes/player.tscn");
             var newPlayer = playerScence.Instantiate<Player>();
@@ -241,7 +247,6 @@ public partial class GameManager : Node2D
 
         _currentPlayerIndex = 0;
 
-        UpdateCurrentPlayerUI();
         // 2. 打亂 _players 順序（遊戲邏輯用）
         // var rng = new Random();
         // Players = Players.OrderBy(_ => rng.Next()).ToList();
