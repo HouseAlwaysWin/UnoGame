@@ -43,11 +43,6 @@ public partial class GameStateMachine : Node
             case GameState.DealCards:
                 await _gameManager.DealBeginCard();
                 await _gameManager.InitPlayerAndUIAsync();
-                // await _gameManager.MoveCardsToTarget(_gameManager.Deck, 7, _gameManager.DeckPileNode,
-                //     _gameManager.PlayerHand,
-                //     offset: (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); });
-                // await DealingCardsToPlayerAsync(_gameManager.PlayerHand, 7);
-                // _gameManager.PlayerHand.SetHandCardsInteractive(true);
                 ChangeState(GameState.WaitForPlayerAction);
                 break;
 
