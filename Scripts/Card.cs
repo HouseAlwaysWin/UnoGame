@@ -63,7 +63,7 @@ public partial class Card : Area2D
     private Area2D _dropZoneArea;
     private Node2D _dropZoneNode;
     private string CardImgName;
-    private static int _globalZCounter = 1000;
+    private static int _globalZCounter = 200;
     private GameManager _gameManager;
     private bool _isHovered = false;
     public CardAnimator CardAnimator;

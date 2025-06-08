@@ -7,8 +7,10 @@ public partial class DargManager : Node2D
 {
     [Export] public NodePath GameManagerPath;
     [Export] public NodePath DropZonePath;
+    [Export] public NodePath GameStateMachinePath;
 
     private GameManager _gameManager;
+    private GameStateMachine _gameStateMachine;
     private DropZone _dropZone;
     private Area2D _dropZoneArea;
     private Card _currentCard;
@@ -17,6 +19,7 @@ public partial class DargManager : Node2D
     {
         _gameManager = GetNode<GameManager>(GameManagerPath);
         _dropZone = GetNode<DropZone>(DropZonePath);
+        _gameStateMachine = GetNode<GameStateMachine>(GameStateMachinePath);
         _dropZoneArea = _dropZone.GetNode<Area2D>("DropZoneArea");
 
         // 把場上所有已生成的卡片都註冊進來
@@ -76,13 +79,12 @@ public partial class DargManager : Node2D
                 if (dropZoneRect.HasPoint(card.GlobalPosition) && _dropZone.CanPlaceCard(card, dropZoneTopCard))
                 {
                     card.IsInteractive = false;
-
                     var playerHand = card.GetParentOrNull<Player>();
                     if (playerHand == null) return;
                     await _gameManager.MoveCardToTarget(card, playerHand, _dropZone,
                         showAnimation: false);
                     await playerHand.ReorderHand();
-
+                    _gameStateMachine.CardEffect(card);
                     GD.Print("Card dropped in valid zone");
                     return;
                 }
@@ -99,4 +101,6 @@ public partial class DargManager : Node2D
 
         _currentCard = null;
     }
+    
+   
 }

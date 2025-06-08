@@ -140,8 +140,41 @@ public partial class GameStateMachine : Node
             offset: (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); }, showAnimation: showAnimation,
             showCard: showCard);
     }
-    
-    
-    // public void Card
 
+
+    public async void CardEffect(Card card)
+    {
+        if (card.CardType == CardType.Wild)
+        {
+            _gameManager.ColorSelector.Visible = true;
+            _gameManager.NextTurn();
+            _gameManager.SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.WildDrawFour)
+        {
+            _gameManager.ColorSelector.Visible = true;
+            await DealingCardsToPlayerAsync(_gameManager.NextPlayer, 4);
+            await _gameManager.NextPlayer.ReorderHand();
+            _gameManager.NextTurn();
+            _gameManager.SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.DrawTwo)
+        {
+            await DealingCardsToPlayerAsync(_gameManager.NextPlayer, 2);
+            await _gameManager.NextPlayer.ReorderHand();
+            _gameManager.NextTurn();
+            _gameManager.SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.Skip)
+        {
+            _gameManager.NextTurn(2);
+            _gameManager.SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.Reverse)
+        {
+            await _gameManager.ReverseDirection();
+            _gameManager.NextTurn();
+            _gameManager.SetCurrentPlayerHandActive();
+        }
+    }
 }

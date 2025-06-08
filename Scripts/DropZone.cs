@@ -20,6 +20,8 @@ public partial class DropZone : Node2D
         return card.CardColor == topCard.CardColor
                || (card.CardType == topCard.CardType && card.Number == topCard.Number);
     }
+    
+    
 
     public Card GetTopCardInDropZone()
     {

@@ -17,6 +17,7 @@ MaxCardSpacing = 500.0
 [node name="DragManager" parent="." instance=ExtResource("7_6bp64")]
 GameManagerPath = NodePath("..")
 DropZonePath = NodePath("../DropZonePile")
+GameStateMachinePath = NodePath("../GameStateMachine")
 
 [node name="PlayerHandZone" parent="." instance=ExtResource("2_8gbba")]
 position = Vector2(360, 608)
@@ -31,61 +32,74 @@ position = Vector2(592, 163)
 [node name="PlayerZone" type="Node2D" parent="."]
 position = Vector2(576, -240)
 
-[node name="UI" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
+[node name="UI" type="CanvasLayer" parent="."]
 
-[node name="PlayerInfoPanel" type="VBoxContainer" parent="UI"]
+[node name="UIRoot" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="PlayerInfoPanel" type="VBoxContainer" parent="UI/UIRoot"]
 layout_mode = 0
 offset_left = 88.0
 offset_top = 24.0
 offset_right = 128.0
 offset_bottom = 64.0
 
-[node name="TestButton" type="VBoxContainer" parent="UI"]
-layout_mode = 0
-offset_left = 1144.0
-offset_top = 288.0
-offset_right = 1272.0
-offset_bottom = 662.0
+[node name="ColorSelector" parent="UI/UIRoot" instance=ExtResource("4_21xkr")]
+layout_mode = 1
 
-[node name="PlayButton2" type="Button" parent="UI/TestButton"]
+[node name="TestButton" type="VBoxContainer" parent="UI/UIRoot"]
+z_index = 500
+layout_mode = 0
+offset_left = 1128.0
+offset_top = 280.0
+offset_right = 1273.0
+offset_bottom = 708.0
+
+[node name="PlayButton2" type="Button" parent="UI/UIRoot/TestButton"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "下輪"
 
-[node name="PlayButton" type="Button" parent="UI/TestButton"]
+[node name="PlayButton" type="Button" parent="UI/UIRoot/TestButton"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "發牌"
 
-[node name="PlayButton3" type="Button" parent="UI/TestButton"]
+[node name="PlayButton3" type="Button" parent="UI/UIRoot/TestButton"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "轉向"
 
-[node name="PlayButton4" type="Button" parent="UI/TestButton"]
+[node name="PlayButton4" type="Button" parent="UI/UIRoot/TestButton"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "出牌"
 
-[node name="PlayButton5" type="Button" parent="UI/TestButton"]
+[node name="PlayButton5" type="Button" parent="UI/UIRoot/TestButton"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "顯示卡牌"
 
-[node name="PlayButton6" type="Button" parent="UI/TestButton"]
+[node name="PlayButton6" type="Button" parent="UI/UIRoot/TestButton"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "跳過"
 
-[node name="PlayButton7" type="Button" parent="UI/TestButton"]
+[node name="PlayButton7" type="Button" parent="UI/UIRoot/TestButton"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Wild +4"
 
-[node name="WildColorSelector" parent="UI" instance=ExtResource("4_21xkr")]
-visible = false
+[node name="PlayButton8" type="Button" parent="UI/UIRoot/TestButton"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Color選擇"
 
 [node name="DirectionArrow" parent="." instance=ExtResource("4_jjvhh")]
 position = Vector2(40, 104)
