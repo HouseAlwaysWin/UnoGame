@@ -224,20 +224,6 @@ public partial class GameManager : Node2D
         for (int i = 1; i <= comPlayerNumber; i++)
         {
             var playerName = $"Player {i}";
-
-            //   設定Player UI
-            var playerUIScence = GD.Load<PackedScene>("res://Scenes/player_ui.tscn");
-            var newPlayerUI = playerUIScence.Instantiate<PlayerUI>();
-            PlayerInfoPanel.AddChild(newPlayerUI);
-            newPlayerUI.InitPlayerUI(playerName, i.ToString(), $"avatar{i}.jpeg", playerName);
-            PlayerUIInfos.Add(newPlayerUI);
-        }
-
-        UpdateCurrentPlayerUI();
-
-        for (int i = 1; i <= comPlayerNumber; i++)
-        {
-            var playerName = $"Player {i}";
             //  建立 Player 實體
             var playerScence = GD.Load<PackedScene>("res://Scenes/player.tscn");
             var newPlayer = playerScence.Instantiate<Player>();
@@ -245,29 +231,32 @@ public partial class GameManager : Node2D
             newPlayer.PlayerSeqNo = i - 1; // 玩家序號從 0 開始
             newPlayer.PlayerId = playerName;
             newPlayer.Name = playerName;
-            // if (newPlayer.PlayerId == CurrentPlayerHandId)
-            // {
-            //     newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition;
-            // }
-            // else
-            // {
-            // newPlayer.GlobalPosition = _playerZone.GlobalPosition + new Vector2(0, i * -150);
-            // newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition + new Vector2(0, i * -150);
 
             newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition;
-            if (newPlayer.PlayerId != CurrentPlayerId)
-            {
-                await _gameStateMachine.DealingCardsToPlayerAsync(newPlayer, 7, false, false);
-            }
-            else
-            {
-                await _gameStateMachine.DealingCardsToPlayerAsync(newPlayer, 7, true, true);
-            }
-
-            // }
+            
+            //   設定Player UI
+            var playerUIScence = GD.Load<PackedScene>("res://Scenes/player_ui.tscn");
+            var newPlayerUI = playerUIScence.Instantiate<PlayerUI>();
+            PlayerInfoPanel.AddChild(newPlayerUI);
+            newPlayerUI.InitPlayerUI(newPlayer, i.ToString(), $"avatar{i}.jpeg", playerName);
+            PlayerUIInfos.Add(newPlayerUI);
+            
             Players.Add(newPlayer);
         }
 
+        foreach (var player in Players)
+        {
+            if (player.PlayerId != CurrentPlayerId)
+            {
+                await _gameStateMachine.DealingCardsToPlayerAsync(player, 7, false, false);
+            }
+            else
+            {
+                await _gameStateMachine.DealingCardsToPlayerAsync(player, 7, true, true);
+            }
+        }
+
+        UpdateCurrentPlayerUI();
         _currentPlayerIndex = 0;
 
         // 2. 打亂 _players 順序（遊戲邏輯用）
@@ -299,7 +288,10 @@ public partial class GameManager : Node2D
         {
             var playerUI = PlayerUIInfos[i];
             playerUI.SeqNo.Text = $"{i + 1}.";
+            playerUI.SetPlayerHandCardNumber();
             playerUI.PlayerName.AddThemeColorOverride("font_color",
+                i == _currentPlayerIndex ? Colors.Yellow : Colors.White);
+            playerUI.HandCardNumber.AddThemeColorOverride("font_color",
                 i == _currentPlayerIndex ? Colors.Yellow : Colors.White);
         }
     }

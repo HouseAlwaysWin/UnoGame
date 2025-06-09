@@ -21,3 +21,7 @@ expand_mode = 1
 [node name="PlayerName" type="Label" parent="."]
 layout_mode = 2
 text = "Terry"
+
+[node name="HandCardNumber" type="Label" parent="."]
+layout_mode = 2
+text = "(7)"
