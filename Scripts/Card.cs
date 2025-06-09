@@ -26,7 +26,8 @@ public enum CardType
 
 public partial class Card : Area2D
 {
-    [ExportGroup("Card Information")] [Export]
+    [ExportGroup("Card Information")]
+    [Export]
     public Vector2 CardSize = new Vector2(100, 150);
 
     [Export] public CardType CardType;
@@ -127,7 +128,7 @@ public partial class Card : Area2D
                     // 只有自己是目前拖曳者時才能放開
                     IsDragging = false;
                     EmitSignal(nameof(DragEndedSignal), this);
-  
+
                 }
             }
         }

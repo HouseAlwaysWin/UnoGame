@@ -1,7 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://be0of4kyyqmjt"]
+[gd_scene load_steps=11 format=3 uid="uid://bnp247r7gw1q5"]
+
+[ext_resource type="Script" uid="uid://dx3px2hipqsus" path="res://Scripts/WildColorSelector.cs" id="1_qpn4s"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eb4bx"]
-bg_color = Color(0.654232, 0.654232, 0.654232, 1)
+bg_color = Color(0.0923972, 0.092397, 0.0923971, 1)
 border_width_left = 5
 border_width_top = 5
 border_width_right = 5
@@ -135,6 +137,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_qpn4s")
 
 [node name="Mask" type="ColorRect" parent="."]
 z_index = 400
@@ -170,7 +173,7 @@ size_flags_vertical = 4
 [node name="RichTextLabel" type="RichTextLabel" parent="PanelContainer/VBoxContainer"]
 custom_minimum_size = Vector2(100, 25)
 layout_mode = 2
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 text = "請選擇顏色"
 
 [node name="ButtonRed" type="Button" parent="PanelContainer/VBoxContainer"]

@@ -63,15 +63,15 @@ public partial class GameManager : Node2D
 
     private Card _currentTopCard; // 新增
     private GameStateMachine _gameStateMachine;
-    public Control ColorSelector;
+    public WildColorSelector ColorSelector;
 
 
     public override async void _Ready()
     {
         // DebugHelper.WaitForDebugger();
-        ColorSelector = GetNode<Control>("UI/UIRoot/ColorSelector");
+        ColorSelector = GetNode<WildColorSelector>("UI/UIRoot/ColorSelector");
         ColorSelector.Visible = false;
-        
+
 
         _playerZone = GetNode<Node2D>("PlayerZone");
         DeckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
@@ -96,7 +96,7 @@ public partial class GameManager : Node2D
 
         _playButton7 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton7");
         _playButton7.Pressed += onPlayButtonPressed7;
-        
+
         _playButton8 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton8");
         _playButton8.Pressed += onPlayButtonPressed8;
 
@@ -162,10 +162,10 @@ public partial class GameManager : Node2D
         await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 4);
         await NextPlayer.ReorderHand();
     }
-    
+
     private async void onPlayButtonPressed8()
     {
-       ColorSelector.Visible = !ColorSelector.Visible; 
+        ColorSelector.Visible = !ColorSelector.Visible;
     }
 
     public async void OnPassed()
@@ -316,6 +316,21 @@ public partial class GameManager : Node2D
         }
     }
 
+    public async void ShowCurrentPlayerCard()
+    {
+        foreach (var player in Players)
+        {
+            if (player == CurrentPlayer)
+            {
+                player.ShowHandCards(true);
+            }
+            else
+            {
+                player.ShowHandCards(false);
+            }
+        }
+    }
+
     private void UpdateHoveredCard()
     {
         var topCard = GetTopCard();
@@ -372,7 +387,7 @@ public partial class GameManager : Node2D
         _hoveredCard?.OnHoverExit(); // 停止 hover 狀態
         _hoveredCard = null;
     }
-    
+
     public void ClearDraggedCard(Card card)
     {
         if (_draggedCard == card)
