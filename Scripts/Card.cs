@@ -182,7 +182,7 @@ public partial class Card : Area2D
                 BorderWidthLeft = borderWidth,
                 BorderWidthRight = borderWidth,
                 BorderColor = color,
-                // BgColor = new Color(0, 0, 0, 0)
+                BgColor = new Color(0, 0, 0, 0)
             };
 
             style.CornerRadiusTopLeft = radius;

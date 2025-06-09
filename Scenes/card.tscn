@@ -15,10 +15,10 @@ corner_radius_top_right = 17
 corner_radius_bottom_right = 17
 corner_radius_bottom_left = 17
 
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_gmcdd"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0qqmn"]
 size = Vector2(100, 150)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_0qqmn"]
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_gmcdd"]
 size = Vector2(100, 150)
 
 [node name="Card" type="Area2D" node_paths=PackedStringArray("CardImage")]
@@ -36,12 +36,12 @@ offset_bottom = 77.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_0qqmn")
 
-[node name="CardImage" type="Sprite2D" parent="."]
-texture = SubResource("PlaceholderTexture2D_gmcdd")
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(1, 0.5)
 shape = SubResource("RectangleShape2D_0qqmn")
+
+[node name="CardImage" type="Sprite2D" parent="."]
+texture = SubResource("PlaceholderTexture2D_gmcdd")
 
 [node name="CardAnimator" type="Node" parent="."]
 script = ExtResource("2_wf8id")

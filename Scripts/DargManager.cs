@@ -75,20 +75,17 @@ public partial class DargManager : Node2D
 
                 var dropZoneRect = new Rect2(dropZonePos - halfSize, dropSize);
                 var dropZoneTopCard = _dropZone.GetTopCardInDropZone();
-                // if (dropZoneTopCard.CardType == CardType.Wild || dropZoneTopCard.CardType == CardType.WildDrawFour)
-                // {
-                dropZoneTopCard.ResetBorder();
-                // }
 
                 if (dropZoneRect.HasPoint(card.GlobalPosition) && _dropZone.CanPlaceCard(card, dropZoneTopCard))
                 {
+                    dropZoneTopCard.ResetBorder();
                     card.IsInteractive = false;
                     var playerHand = card.GetParentOrNull<Player>();
                     if (playerHand == null) return;
                     await _gameManager.MoveCardToTarget(card, playerHand, _dropZone,
                         showAnimation: false);
                     await playerHand.ReorderHand();
-                    _gameStateMachine.CardEffect(card);
+                    await _gameStateMachine.CardEffect(card);
                     GD.Print("Card dropped in valid zone");
                     return;
                 }
