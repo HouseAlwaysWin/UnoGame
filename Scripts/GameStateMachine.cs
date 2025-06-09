@@ -47,7 +47,7 @@ public partial class GameStateMachine : Node
                 break;
 
             case GameState.WaitForPlayerAction:
-                // 玩家能開始拖曳卡片出牌
+                _gameManager.SetCurrentPlayerHandActive();
                 break;
 
             case GameState.ResolveEffect:
@@ -137,58 +137,5 @@ public partial class GameStateMachine : Node
     }
 
 
-    public async Task CardEffect(Card card)
-    {
-        if (card.CardType == CardType.Wild)
-        {
-            CardColor selectColor = await _gameManager.ColorSelector.ShowAndWait();
-            card.CardColor = selectColor; // 更新卡片顏色
-            card.SetWildColor(selectColor);
-
-            _gameManager.NextTurn();
-            _gameManager.ShowCurrentPlayerCard();
-            _gameManager.SetCurrentPlayerHandActive();
-        }
-        else if (card.CardType == CardType.WildDrawFour)
-        {
-            CardColor selectColor = await _gameManager.ColorSelector.ShowAndWait();
-            card.CardColor = selectColor; // 更新卡片顏色
-            card.SetWildColor(selectColor);
-            _gameManager.NextTurn();
-
-            _gameManager.ShowCurrentPlayerCard();
-            await DealingCardsToPlayerAsync(_gameManager.CurrentPlayer, 4);
-            await _gameManager.CurrentPlayer.ReorderHand();
-            _gameManager.SetCurrentPlayerHandActive();
-
-        }
-        else if (card.CardType == CardType.DrawTwo)
-        {
-            _gameManager.NextTurn();
-
-            _gameManager.ShowCurrentPlayerCard();
-            await DealingCardsToPlayerAsync(_gameManager.CurrentPlayer, 2);
-            await _gameManager.CurrentPlayer.ReorderHand();
-            _gameManager.SetCurrentPlayerHandActive();
-        }
-        else if (card.CardType == CardType.Skip)
-        {
-            _gameManager.NextTurn(2);
-
-            _gameManager.ShowCurrentPlayerCard();
-            _gameManager.SetCurrentPlayerHandActive();
-        }
-        else if (card.CardType == CardType.Reverse)
-        {
-            await _gameManager.ReverseDirection();
-            _gameManager.NextTurn();
-            _gameManager.ShowCurrentPlayerCard();
-            _gameManager.SetCurrentPlayerHandActive();
-        }
-        else
-        {
-            _gameManager.NextTurn();
-            _gameManager.ShowCurrentPlayerCard();
-        }
-    }
+    
 }

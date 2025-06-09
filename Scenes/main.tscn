@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dxobqmv5p3elk"]
+[gd_scene load_steps=9 format=3 uid="uid://dxobqmv5p3elk"]
 
 [ext_resource type="Script" uid="uid://bhsixk7jaxc6o" path="res://Scripts/GameManager.cs" id="1_bo1nx"]
 [ext_resource type="PackedScene" uid="uid://uodlgyfqonj5" path="res://Scenes/player.tscn" id="2_8gbba"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://be0of4kyyqmjt" path="res://Scenes/wild_color_selector.tscn" id="4_21xkr"]
 [ext_resource type="PackedScene" uid="uid://bqc6j50tq72ju" path="res://Scenes/direction_arrow.tscn" id="4_jjvhh"]
 [ext_resource type="PackedScene" uid="uid://swttoeppx8s" path="res://Scenes/game_state_machine.tscn" id="5_kry3j"]
+[ext_resource type="PackedScene" uid="uid://bw6aiq4rq68ga" path="res://Scenes/game_over_ui.tscn" id="6_344ge"]
 [ext_resource type="PackedScene" uid="uid://becl8hfexr5l6" path="res://Scenes/drag_manager.tscn" id="7_6bp64"]
 
 [node name="Main" type="Node2D"]
@@ -51,6 +52,11 @@ offset_right = 128.0
 offset_bottom = 64.0
 
 [node name="ColorSelector" parent="UI/UIRoot" instance=ExtResource("4_21xkr")]
+visible = false
+layout_mode = 1
+
+[node name="GameOverUI" parent="UI/UIRoot" instance=ExtResource("6_344ge")]
+visible = false
 layout_mode = 1
 
 [node name="PassButton" type="Button" parent="UI/UIRoot"]

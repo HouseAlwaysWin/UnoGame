@@ -82,14 +82,20 @@ public partial class DargManager : Node2D
                     card.IsInteractive = false;
                     var playerHand = card.GetParentOrNull<Player>();
                     if (playerHand == null) return;
+                    if (playerHand.GetPlayerHandCards().Count == 0)
+                    {
+                        
+                        return;
+                    }
                     await _gameManager.MoveCardToTarget(card, playerHand, _dropZone,
                         showAnimation: false);
                     await playerHand.ReorderHand();
-                    await _gameStateMachine.CardEffect(card);
+
+                    await _gameManager.CardEffect(card);
+
                     GD.Print("Card dropped in valid zone");
                     return;
                 }
-
             }
         }
 
@@ -97,11 +103,9 @@ public partial class DargManager : Node2D
         GD.Print("Card dropped outside zone, returning");
         await card.CardAnimator.TweenTo(card.OriginalPosition, 0.2f);
         card.ReturnToOriginalZ();
-        await Task.Delay(100); // 微延遲防止立即觸發 Hover
+        // await Task.Delay(100); // 微延遲防止立即觸發 Hover
         card.IsInteractive = true;
 
         _currentCard = null;
     }
-
-
 }

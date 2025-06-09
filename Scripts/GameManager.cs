@@ -231,7 +231,6 @@ public partial class GameManager : Node2D
             newPlayer.PlayerSeqNo = i - 1; // 玩家序號從 0 開始
             newPlayer.PlayerId = playerName;
             newPlayer.Name = playerName;
-
             newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition;
             
             //   設定Player UI
@@ -240,10 +239,9 @@ public partial class GameManager : Node2D
             PlayerInfoPanel.AddChild(newPlayerUI);
             newPlayerUI.InitPlayerUI(newPlayer, i.ToString(), $"avatar{i}.jpeg", playerName);
             PlayerUIInfos.Add(newPlayerUI);
-            
             Players.Add(newPlayer);
         }
-
+        
         foreach (var player in Players)
         {
             if (player.PlayerId != CurrentPlayerId)
@@ -264,7 +262,7 @@ public partial class GameManager : Node2D
         // Players = Players.OrderBy(_ => rng.Next()).ToList();
         // var player = Players.FirstOrDefault(p => p.PlayerId == CurrentPlayerHandId);
         // await _gameStateMachine.DealingCardsToPlayerAsync(player, 7);
-        SetCurrentPlayerHandActive();
+        // SetCurrentPlayerHandActive();
     }
 
     public void NextTurn(int skip = 1)
@@ -462,6 +460,61 @@ public partial class GameManager : Node2D
             deck.RemoveAt(0);
             var offsetValue = offset != null ? offset(i) : new Vector2(i * CardSpacing, 0);
             await MoveCardToTarget(card, fromNode, toNode, showAnimation, showCard, duration, offsetValue);
+        }
+    }
+    
+    public async Task CardEffect(Card card)
+    {
+        if (card.CardType == CardType.Wild)
+        {
+            CardColor selectColor = await ColorSelector.ShowAndWait();
+            card.CardColor = selectColor; // 更新卡片顏色
+            card.SetWildColor(selectColor);
+
+            NextTurn();
+            ShowCurrentPlayerCard();
+            SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.WildDrawFour)
+        {
+            CardColor selectColor = await ColorSelector.ShowAndWait();
+            card.CardColor = selectColor; // 更新卡片顏色
+            card.SetWildColor(selectColor);
+            NextTurn();
+
+            ShowCurrentPlayerCard();
+            await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 4);
+            await CurrentPlayer.ReorderHand();
+            SetCurrentPlayerHandActive();
+
+        }
+        else if (card.CardType == CardType.DrawTwo)
+        {
+            NextTurn();
+
+            ShowCurrentPlayerCard();
+            await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 2);
+            await CurrentPlayer.ReorderHand();
+            SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.Skip)
+        {
+            NextTurn(2);
+
+            ShowCurrentPlayerCard();
+            SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.Reverse)
+        {
+            await ReverseDirection();
+            NextTurn();
+            ShowCurrentPlayerCard();
+            SetCurrentPlayerHandActive();
+        }
+        else
+        {
+            NextTurn();
+            ShowCurrentPlayerCard();
         }
     }
 }

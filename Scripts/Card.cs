@@ -82,7 +82,6 @@ public partial class Card : Area2D
         _dropZoneNode = _gameManager.DropZonePileNode;
         _dropZoneArea = _gameManager.DropZoneArea;
         OriginalZIndex = ZIndex;
-
         _originalStyleBox = GetNode<Panel>("Border").GetThemeStylebox("panel")?.Duplicate() as StyleBoxFlat;
     }
 
