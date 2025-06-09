@@ -77,7 +77,7 @@ public partial class GameManager : Node2D
         DeckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
         PlayerHandZone = GetNode<Node2D>("PlayerHandZone");
         _playButton = GetNode<Button>("UI/UIRoot/TestButton/PlayButton");
-        _playButton.Pressed += onPlayButtonPressed;
+        _playButton.Pressed += OnPlayButtonPressed;
 
         _playButton2 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton2");
         _playButton2.Pressed += onPlayButtonPressed2;
@@ -100,6 +100,8 @@ public partial class GameManager : Node2D
         _playButton8 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton8");
         _playButton8.Pressed += onPlayButtonPressed8;
 
+        GetNode<Button>("UI/UIRoot/PassButton").Pressed += OnPlayButtonPressed;
+
         _directionArrow = GetNode<Node2D>("DirectionArrow");
         _directionArrow.RotationDegrees = 90;
         _arrowRotation = 90;
@@ -115,7 +117,7 @@ public partial class GameManager : Node2D
     }
 
 
-    private async void onPlayButtonPressed()
+    private async void OnPlayButtonPressed()
     {
         OnPassed();
     }
@@ -173,6 +175,8 @@ public partial class GameManager : Node2D
         await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer);
         CurrentPlayer.SetHandCardsInteractive(true);
         await CurrentPlayer.ReorderHand();
+        NextTurn();
+        ShowCurrentPlayerCard();
     }
 
 

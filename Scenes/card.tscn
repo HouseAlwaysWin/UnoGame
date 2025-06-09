@@ -3,9 +3,6 @@
 [ext_resource type="Script" uid="uid://bh4luesglka0y" path="res://Scripts/Card.cs" id="1_0qqmn"]
 [ext_resource type="Script" uid="uid://dyhp7f1ri7fph" path="res://Scripts/CardAnimator.cs" id="2_wf8id"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_0qqmn"]
-size = Vector2(100, 150)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0qqmn"]
 bg_color = Color(0.359069, 0.359069, 0.359069, 1)
 border_width_left = 2
@@ -21,14 +18,13 @@ corner_radius_bottom_left = 17
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_gmcdd"]
 size = Vector2(100, 150)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0qqmn"]
+size = Vector2(100, 150)
+
 [node name="Card" type="Area2D" node_paths=PackedStringArray("CardImage")]
 script = ExtResource("1_0qqmn")
 CardColor = 4
 CardImage = NodePath("CardImage")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(1, 0.5)
-shape = SubResource("RectangleShape2D_0qqmn")
 
 [node name="Border" type="Panel" parent="."]
 clip_contents = true
@@ -42,6 +38,10 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_0qqmn")
 
 [node name="CardImage" type="Sprite2D" parent="."]
 texture = SubResource("PlaceholderTexture2D_gmcdd")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1, 0.5)
+shape = SubResource("RectangleShape2D_0qqmn")
 
 [node name="CardAnimator" type="Node" parent="."]
 script = ExtResource("2_wf8id")

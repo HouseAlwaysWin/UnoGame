@@ -75,6 +75,10 @@ public partial class DargManager : Node2D
 
                 var dropZoneRect = new Rect2(dropZonePos - halfSize, dropSize);
                 var dropZoneTopCard = _dropZone.GetTopCardInDropZone();
+                // if (dropZoneTopCard.CardType == CardType.Wild || dropZoneTopCard.CardType == CardType.WildDrawFour)
+                // {
+                dropZoneTopCard.ResetBorder();
+                // }
 
                 if (dropZoneRect.HasPoint(card.GlobalPosition) && _dropZone.CanPlaceCard(card, dropZoneTopCard))
                 {
@@ -88,7 +92,7 @@ public partial class DargManager : Node2D
                     GD.Print("Card dropped in valid zone");
                     return;
                 }
-              
+
             }
         }
 
@@ -101,6 +105,6 @@ public partial class DargManager : Node2D
 
         _currentCard = null;
     }
-    
-   
+
+
 }

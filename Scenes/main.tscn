@@ -53,6 +53,15 @@ offset_bottom = 64.0
 [node name="ColorSelector" parent="UI/UIRoot" instance=ExtResource("4_21xkr")]
 layout_mode = 1
 
+[node name="PassButton" type="Button" parent="UI/UIRoot"]
+layout_mode = 0
+offset_left = 141.0
+offset_top = 608.0
+offset_right = 257.0
+offset_bottom = 685.0
+theme_override_font_sizes/font_size = 50
+text = "Pass"
+
 [node name="TestButton" type="VBoxContainer" parent="UI/UIRoot"]
 z_index = 500
 layout_mode = 0

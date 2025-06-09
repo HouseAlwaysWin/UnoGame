@@ -143,6 +143,7 @@ public partial class GameStateMachine : Node
         {
             CardColor selectColor = await _gameManager.ColorSelector.ShowAndWait();
             card.CardColor = selectColor; // 更新卡片顏色
+            card.SetWildColor(selectColor);
 
             _gameManager.NextTurn();
             _gameManager.ShowCurrentPlayerCard();
@@ -152,12 +153,13 @@ public partial class GameStateMachine : Node
         {
             CardColor selectColor = await _gameManager.ColorSelector.ShowAndWait();
             card.CardColor = selectColor; // 更新卡片顏色
+            card.SetWildColor(selectColor);
             _gameManager.NextTurn();
 
             _gameManager.ShowCurrentPlayerCard();
+            await DealingCardsToPlayerAsync(_gameManager.CurrentPlayer, 4);
+            await _gameManager.CurrentPlayer.ReorderHand();
             _gameManager.SetCurrentPlayerHandActive();
-            await DealingCardsToPlayerAsync(_gameManager.NextPlayer, 4);
-            await _gameManager.NextPlayer.ReorderHand();
 
         }
         else if (card.CardType == CardType.DrawTwo)
@@ -165,9 +167,9 @@ public partial class GameStateMachine : Node
             _gameManager.NextTurn();
 
             _gameManager.ShowCurrentPlayerCard();
+            await DealingCardsToPlayerAsync(_gameManager.CurrentPlayer, 2);
+            await _gameManager.CurrentPlayer.ReorderHand();
             _gameManager.SetCurrentPlayerHandActive();
-            await DealingCardsToPlayerAsync(_gameManager.NextPlayer, 2);
-            await _gameManager.NextPlayer.ReorderHand();
         }
         else if (card.CardType == CardType.Skip)
         {

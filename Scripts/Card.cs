@@ -36,6 +36,8 @@ public partial class Card : Area2D
 
     [Export] public int Number = -1;
 
+    private StyleBoxFlat _originalStyleBox;
+
     // [Export] public bool IsInDeck = false;
     public bool IsInteractive = false; // 預設不可互動
 
@@ -80,6 +82,8 @@ public partial class Card : Area2D
         _dropZoneNode = _gameManager.DropZonePileNode;
         _dropZoneArea = _gameManager.DropZoneArea;
         OriginalZIndex = ZIndex;
+
+        _originalStyleBox = GetNode<Panel>("Border").GetThemeStylebox("panel")?.Duplicate() as StyleBoxFlat;
     }
 
     public override void _Process(double delta)
@@ -146,10 +150,70 @@ public partial class Card : Area2D
         ZIndex = OriginalZIndex;
     }
 
+    public void ResetBorder()
+    {
+        var border = GetNode<Panel>("Border");
+        if (_originalStyleBox != null)
+            border.AddThemeStyleboxOverride("panel", _originalStyleBox);
+        border.Visible = true;
+    }
+
+    public void SetWildColor(CardColor newColor)
+    {
+        CardColor = newColor;
+
+        // 取得 Border 節點
+        var border = GetNode<Control>("Border");
+
+        // 設定顏色
+        var color = Card.GetColorFromEnum(newColor);
+
+        // 改變 Border 顏色（根據型別）
+        if (border is ColorRect cr)
+            cr.Color = color;
+        else if (border is Panel panel)
+        {
+            int borderWidth = 100;
+            int radius = 12;
+            var style = new StyleBoxFlat
+            {
+                BorderWidthBottom = borderWidth,
+                BorderWidthTop = borderWidth,
+                BorderWidthLeft = borderWidth,
+                BorderWidthRight = borderWidth,
+                BorderColor = color,
+                // BgColor = new Color(0, 0, 0, 0)
+            };
+
+            style.CornerRadiusTopLeft = radius;
+            style.CornerRadiusTopRight = radius;
+            style.CornerRadiusBottomLeft = radius;
+            style.CornerRadiusBottomRight = radius;
+            panel.AddThemeStyleboxOverride("panel", style);
+        }
+        else if (border is TextureRect tr)
+            tr.Modulate = color;
+
+        border.Visible = true; // 確保顯示
+    }
+
+    public static Color GetColorFromEnum(CardColor color)
+    {
+        return color switch
+        {
+            CardColor.Red => Colors.Red,
+            CardColor.Yellow => Colors.Yellow,
+            CardColor.Blue => Colors.Blue,
+            CardColor.Green => Colors.Green,
+            _ => Colors.White
+        };
+    }
+
+
+
     public void InstantiateCard(string cardImgName = "", CardColor? cardColor = null,
         CardType? cardType = null, int cardNumber = -1)
     {
-        // PlayerHand = playerHand;
         CardImage = GetNode<Sprite2D>("CardImage");
         var cardImg = string.IsNullOrEmpty(cardImgName) ? "deck" : cardImgName;
         if (CardImage != null)
@@ -164,7 +228,6 @@ public partial class Card : Area2D
                 CardSize.X / textureSize.X,
                 CardSize.Y / textureSize.Y
             );
-            // DropZonePath = dropZonePath;
         }
     }
 }
