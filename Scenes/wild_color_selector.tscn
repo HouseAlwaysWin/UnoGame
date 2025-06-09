@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=3 uid="uid://bnp247r7gw1q5"]
 
-[ext_resource type="Script" uid="uid://dx3px2hipqsus" path="res://Scripts/WildColorSelector.cs" id="1_qpn4s"]
+[ext_resource type="Script" uid="uid://cxnxkhyeru1wl" path="res://Scripts/WildColorSelector.cs" id="1_qpn4s"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eb4bx"]
 bg_color = Color(0.0923972, 0.092397, 0.0923971, 1)
