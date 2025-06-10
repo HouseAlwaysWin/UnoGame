@@ -13,15 +13,15 @@ public partial class DropZone : Node2D
         _gameManager = GetParentOrNull<GameManager>();
     }
 
-    public  bool CanPlaceCard(Card card, Card topCard)
+    public bool CanPlaceCard(Card card, Card topCard)
     {
         if (card.CardColor == CardColor.Wild || topCard.CardColor == CardColor.Wild)
             return true;
         return card.CardColor == topCard.CardColor
                || (card.CardType == topCard.CardType && card.Number == topCard.Number);
     }
-    
-    
+
+
 
     public Card GetTopCardInDropZone()
     {
@@ -42,5 +42,5 @@ public partial class DropZone : Node2D
 
         return topCard;
     }
-   
+
 }

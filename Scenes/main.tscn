@@ -68,7 +68,16 @@ offset_bottom = 685.0
 theme_override_font_sizes/font_size = 50
 text = "Pass"
 
-[node name="TestButton" type="VBoxContainer" parent="UI/UIRoot"]
+[node name="MyPlayer" type="Label" parent="UI/UIRoot"]
+layout_mode = 0
+offset_left = 39.0
+offset_top = 705.0
+offset_right = 263.0
+offset_bottom = 774.0
+theme_override_font_sizes/font_size = 50
+text = "MyPlayer"
+
+[node name="TestButtonGroup" type="VBoxContainer" parent="UI/UIRoot"]
 z_index = 500
 layout_mode = 0
 offset_left = 1128.0
@@ -76,42 +85,42 @@ offset_top = 280.0
 offset_right = 1273.0
 offset_bottom = 708.0
 
-[node name="PlayButton2" type="Button" parent="UI/UIRoot/TestButton"]
+[node name="PlayButton2" type="Button" parent="UI/UIRoot/TestButtonGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "下輪"
 
-[node name="PlayButton" type="Button" parent="UI/UIRoot/TestButton"]
+[node name="PlayButton" type="Button" parent="UI/UIRoot/TestButtonGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "發牌"
 
-[node name="PlayButton3" type="Button" parent="UI/UIRoot/TestButton"]
+[node name="PlayButton3" type="Button" parent="UI/UIRoot/TestButtonGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "轉向"
 
-[node name="PlayButton4" type="Button" parent="UI/UIRoot/TestButton"]
+[node name="PlayButton4" type="Button" parent="UI/UIRoot/TestButtonGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "出牌"
 
-[node name="PlayButton5" type="Button" parent="UI/UIRoot/TestButton"]
+[node name="PlayButton5" type="Button" parent="UI/UIRoot/TestButtonGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "顯示卡牌"
 
-[node name="PlayButton6" type="Button" parent="UI/UIRoot/TestButton"]
+[node name="PlayButton6" type="Button" parent="UI/UIRoot/TestButtonGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "跳過"
 
-[node name="PlayButton7" type="Button" parent="UI/UIRoot/TestButton"]
+[node name="PlayButton7" type="Button" parent="UI/UIRoot/TestButtonGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Wild +4"
 
-[node name="PlayButton8" type="Button" parent="UI/UIRoot/TestButton"]
+[node name="PlayButton8" type="Button" parent="UI/UIRoot/TestButtonGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Color選擇"

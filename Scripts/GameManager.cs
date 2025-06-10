@@ -13,9 +13,12 @@ public partial class GameManager : Node2D
 
     [Export] public int ComPlayerNumber = 4;
 
+    [Export] public bool TestMode = true; // 是否為測試模式
+
     public List<Card> Deck = new();
     public List<Player> Players = new();
     public Node2D PlayerHandZone;
+    private DropZone _dropZone;
     public CardColor CurrentCardColor;
     public string CurrentPlayerId = "Player 1"; // 當前玩家手牌的 PlayerId
 
@@ -31,7 +34,7 @@ public partial class GameManager : Node2D
                 : (_currentPlayerIndex - 1) + Players.Count % Players.Count)); // 當前玩家手牌的 PlayerId
 
 
-    public Node2D DropZonePileNode;
+    public DropZone DropZonePileNode;
     public Area2D DropZoneArea;
     public Node2D DeckPileNode;
     public VBoxContainer PlayerInfoPanel;
@@ -53,7 +56,7 @@ public partial class GameManager : Node2D
     private Button _playButton7;
     private Button _playButton8;
 
-    private Node2D _playerZone;
+    public Node2D PlayerZone;
     private int _currentPlayerIndex = 0;
     private bool _isClockwise = true; // true: 順時針, false: 逆時針
 
@@ -65,6 +68,7 @@ public partial class GameManager : Node2D
     private Card _currentTopCard; // 新增
     private GameStateMachine _gameStateMachine;
     public WildColorSelector ColorSelector;
+    public VBoxContainer TestButtonGroup;
 
 
     public override async void _Ready()
@@ -74,31 +78,32 @@ public partial class GameManager : Node2D
         ColorSelector.Visible = false;
 
 
-        _playerZone = GetNode<Node2D>("PlayerZone");
+        PlayerZone = GetNode<Node2D>("PlayerZone");
         DeckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
         PlayerHandZone = GetNode<Node2D>("PlayerHandZone");
-        _playButton = GetNode<Button>("UI/UIRoot/TestButton/PlayButton");
+        TestButtonGroup = GetNode<VBoxContainer>("UI/UIRoot/TestButtonGroup");
+        _playButton = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton");
         _playButton.Pressed += OnPlayButtonPressed;
 
-        _playButton2 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton2");
+        _playButton2 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton2");
         _playButton2.Pressed += onPlayButtonPressed2;
 
-        _playButton3 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton3");
+        _playButton3 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton3");
         _playButton3.Pressed += onPlayButtonPressed3;
 
-        _playButton4 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton4");
+        _playButton4 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton4");
         _playButton4.Pressed += onPlayButtonPressed4;
 
-        _playButton5 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton5");
+        _playButton5 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton5");
         _playButton5.Pressed += onPlayButtonPressed5;
 
-        _playButton6 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton6");
+        _playButton6 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton6");
         _playButton6.Pressed += onPlayButtonPressed6;
 
-        _playButton7 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton7");
+        _playButton7 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton7");
         _playButton7.Pressed += onPlayButtonPressed7;
 
-        _playButton8 = GetNode<Button>("UI/UIRoot/TestButton/PlayButton8");
+        _playButton8 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton8");
         _playButton8.Pressed += onPlayButtonPressed8;
 
         GetNode<Button>("UI/UIRoot/PassButton").Pressed += OnPlayButtonPressed;
@@ -109,13 +114,15 @@ public partial class GameManager : Node2D
         _arrowRotation = 90;
 
         DropZoneArea = GetNode<Area2D>("DropZonePile/DropZoneArea");
-        DropZonePileNode = GetNode<Node2D>("DropZonePile");
+        DropZonePileNode = GetNode<DropZone>("DropZonePile");
 
         PlayerInfoPanel = GetNode<VBoxContainer>("UI/UIRoot/PlayerInfoPanel");
         // 初始狀態交給 StateMachine 處理
         _gameStateMachine = GetNode<GameStateMachine>("GameStateMachine");
         _gameStateMachine.ChangeState(GameState.Init);
         _gameStateMachine.ChangeState(GameState.DealCards);
+
+
     }
 
 
@@ -139,7 +146,7 @@ public partial class GameManager : Node2D
         // CurrentPlayerHand.ShowHandCards(true);
 
         Card firstCard = CurrentPlayer.GetPlayerHandCards().FirstOrDefault();
-        await MoveCardToTarget(firstCard, _playerZone, DropZonePileNode, showCard: true);
+        await MoveCardToTarget(firstCard, PlayerZone, DropZonePileNode, showCard: true);
     }
 
     private bool _showAllCars = false;
@@ -184,6 +191,8 @@ public partial class GameManager : Node2D
 
     public override void _Process(double delta)
     {
+        TestButtonGroup.Visible = TestMode;
+
         if (_draggedCard == null && !ColorSelector.Visible && !GameOverUI.Visible)
         {
             UpdateHoveredCard();
@@ -226,9 +235,11 @@ public partial class GameManager : Node2D
         for (int i = 1; i <= comPlayerNumber; i++)
         {
             var playerName = $"Player {i}";
+            Player newPlayer = null;
+
             //  建立 Player 實體
             var playerScence = GD.Load<PackedScene>("res://Scenes/player.tscn");
-            var newPlayer = playerScence.Instantiate<Player>();
+            newPlayer = playerScence.Instantiate<Player>();
             AddChild(newPlayer);
             newPlayer.PlayerSeqNo = i - 1; // 玩家序號從 0 開始
             newPlayer.PlayerId = playerName;
@@ -463,6 +474,15 @@ public partial class GameManager : Node2D
             var offsetValue = offset != null ? offset(i) : new Vector2(i * CardSpacing, 0);
             await MoveCardToTarget(card, fromNode, toNode, showAnimation, showCard, duration, offsetValue);
         }
+    }
+
+    public bool CanPlaceCard(Card card)
+    {
+        Card topCard = DropZonePileNode.GetTopCardInDropZone();
+        if (card.CardColor == CardColor.Wild || topCard.CardColor == CardColor.Wild)
+            return true;
+        return card.CardColor == topCard.CardColor
+               || (card.CardType == topCard.CardType && card.Number == topCard.Number);
     }
 
     public async Task CardEffect(Card card)

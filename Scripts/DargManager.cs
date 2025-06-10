@@ -74,10 +74,11 @@ public partial class DargManager : Node2D
                 var halfSize = dropSize / 2;
 
                 var dropZoneRect = new Rect2(dropZonePos - halfSize, dropSize);
-                var dropZoneTopCard = _dropZone.GetTopCardInDropZone();
 
-                if (dropZoneRect.HasPoint(card.GlobalPosition) && _dropZone.CanPlaceCard(card, dropZoneTopCard))
+                if (dropZoneRect.HasPoint(card.GlobalPosition) && _gameManager.CanPlaceCard(card))
                 {
+
+                    var dropZoneTopCard = _dropZone.GetTopCardInDropZone();
                     dropZoneTopCard.ResetBorder();
                     card.IsInteractive = false;
                     var playerHand = card.GetParentOrNull<Player>();
