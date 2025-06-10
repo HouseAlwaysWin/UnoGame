@@ -82,16 +82,18 @@ public partial class DargManager : Node2D
                     card.IsInteractive = false;
                     var playerHand = card.GetParentOrNull<Player>();
                     if (playerHand == null) return;
-                    if (playerHand.GetPlayerHandCards().Count == 0)
-                    {
-                        
-                        return;
-                    }
+
                     await _gameManager.MoveCardToTarget(card, playerHand, _dropZone,
                         showAnimation: false);
                     await playerHand.ReorderHand();
 
                     await _gameManager.CardEffect(card);
+
+                    if (playerHand.GetPlayerHandCards().Count == 0)
+                    {
+                        _gameManager.GameOverUI.GetNode<Label>("PanelContainer/VBoxContainer/PlayerWinLabel").Text = $"{playerHand.Name} wins!";
+                        _gameManager.GameOverUI.Visible = true;
+                    }
 
                     GD.Print("Card dropped in valid zone");
                     return;

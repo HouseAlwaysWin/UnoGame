@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="UnoCardGame"
-run/main_scene="uid://dxobqmv5p3elk"
+run/main_scene="uid://cxr2ji3sml020"
 config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 

@@ -1,0 +1,127 @@
+[gd_scene load_steps=7 format=3 uid="uid://cxr2ji3sml020"]
+
+[ext_resource type="Script" uid="uid://dxbgqichvs0i4" path="res://Scripts/UnoMainMenu.cs" id="1_8tv3j"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8tv3j"]
+bg_color = Color(0.209218, 0.318606, 0.822782, 1)
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
+expand_margin_left = 20.0
+expand_margin_top = 20.0
+expand_margin_right = 20.0
+expand_margin_bottom = 20.0
+shadow_color = Color(0.149401, 0.210571, 0.594254, 0.811765)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ttl08"]
+bg_color = Color(0.291215, 0.786165, 0.0864055, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.325441, 0.325441, 0.325441, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0.0270336, 0.385114, 0.0269732, 0.6)
+shadow_size = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_272wl"]
+bg_color = Color(0.236021, 0.643228, 0.0733554, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.325441, 0.325441, 0.325441, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0.0270336, 0.385114, 0.0269732, 0.6)
+shadow_size = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c004f"]
+bg_color = Color(0.713742, 0.303573, 0.323923, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.325441, 0.325441, 0.325441, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xinps"]
+bg_color = Color(0.843137, 0.14902, 0, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.325441, 0.325441, 0.325441, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+shadow_color = Color(0.0295066, 0.0295066, 0.0295066, 0.6)
+shadow_size = 1
+
+[node name="UnoMainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_8tv3j")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -352.0
+offset_top = 64.0
+offset_right = 352.0
+offset_bottom = 242.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 130
+theme_override_styles/normal = SubResource("StyleBoxFlat_8tv3j")
+text = "UNO Game"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -36.0
+offset_top = -33.0
+offset_right = 36.0
+offset_bottom = 33.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StartButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 50
+theme_override_styles/hover = SubResource("StyleBoxFlat_ttl08")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_272wl")
+theme_override_styles/normal = SubResource("StyleBoxFlat_272wl")
+text = "開始"
+
+[node name="ExitButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 50
+theme_override_styles/hover = SubResource("StyleBoxFlat_c004f")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_xinps")
+theme_override_styles/normal = SubResource("StyleBoxFlat_xinps")
+text = "結束遊戲"

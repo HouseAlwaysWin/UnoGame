@@ -35,6 +35,7 @@ public partial class GameManager : Node2D
     public Area2D DropZoneArea;
     public Node2D DeckPileNode;
     public VBoxContainer PlayerInfoPanel;
+    public Control GameOverUI;
 
     public List<PlayerUI> PlayerUIInfos = new();
 
@@ -101,6 +102,7 @@ public partial class GameManager : Node2D
         _playButton8.Pressed += onPlayButtonPressed8;
 
         GetNode<Button>("UI/UIRoot/PassButton").Pressed += OnPlayButtonPressed;
+        GameOverUI = GetNode<Control>("UI/UIRoot/GameOverUI");
 
         _directionArrow = GetNode<Node2D>("DirectionArrow");
         _directionArrow.RotationDegrees = 90;
@@ -182,7 +184,7 @@ public partial class GameManager : Node2D
 
     public override void _Process(double delta)
     {
-        if (_draggedCard == null && !ColorSelector.Visible)
+        if (_draggedCard == null && !ColorSelector.Visible && !GameOverUI.Visible)
         {
             UpdateHoveredCard();
         }
@@ -232,7 +234,7 @@ public partial class GameManager : Node2D
             newPlayer.PlayerId = playerName;
             newPlayer.Name = playerName;
             newPlayer.GlobalPosition = PlayerHandZone.GlobalPosition;
-            
+
             //   設定Player UI
             var playerUIScence = GD.Load<PackedScene>("res://Scenes/player_ui.tscn");
             var newPlayerUI = playerUIScence.Instantiate<PlayerUI>();
@@ -241,7 +243,7 @@ public partial class GameManager : Node2D
             PlayerUIInfos.Add(newPlayerUI);
             Players.Add(newPlayer);
         }
-        
+
         foreach (var player in Players)
         {
             if (player.PlayerId != CurrentPlayerId)
@@ -462,7 +464,7 @@ public partial class GameManager : Node2D
             await MoveCardToTarget(card, fromNode, toNode, showAnimation, showCard, duration, offsetValue);
         }
     }
-    
+
     public async Task CardEffect(Card card)
     {
         if (card.CardType == CardType.Wild)

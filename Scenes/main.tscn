@@ -4,10 +4,10 @@
 [ext_resource type="PackedScene" uid="uid://uodlgyfqonj5" path="res://Scenes/player.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://c86x7vo8htqv7" path="res://Scenes/drop_zone.tscn" id="2_bo1nx"]
 [ext_resource type="PackedScene" uid="uid://be0of4kyyqmjt" path="res://Scenes/wild_color_selector.tscn" id="4_21xkr"]
-[ext_resource type="PackedScene" uid="uid://bqc6j50tq72ju" path="res://Scenes/direction_arrow.tscn" id="4_jjvhh"]
+[ext_resource type="PackedScene" uid="uid://byocde3chupnm" path="res://Scenes/direction_arrow.tscn" id="4_jjvhh"]
 [ext_resource type="PackedScene" uid="uid://swttoeppx8s" path="res://Scenes/game_state_machine.tscn" id="5_kry3j"]
-[ext_resource type="PackedScene" uid="uid://bw6aiq4rq68ga" path="res://Scenes/game_over_ui.tscn" id="6_344ge"]
-[ext_resource type="PackedScene" uid="uid://becl8hfexr5l6" path="res://Scenes/drag_manager.tscn" id="7_6bp64"]
+[ext_resource type="PackedScene" uid="uid://bcmw6bm4f3112" path="res://Scenes/game_over_ui.tscn" id="6_344ge"]
+[ext_resource type="PackedScene" uid="uid://burctgohhuxne" path="res://Scenes/drag_manager.tscn" id="7_6bp64"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_bo1nx")
