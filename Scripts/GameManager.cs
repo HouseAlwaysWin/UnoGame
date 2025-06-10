@@ -28,7 +28,7 @@ public partial class GameManager : Node2D
         Players.FirstOrDefault(p =>
             p.PlayerSeqNo == (_isClockwise
                 ? (_currentPlayerIndex + 1) % Players.Count
-                : (_currentPlayerIndex - 1) + Players.Count % Players.Count)); // 當前玩家手牌的 PlayerId
+                : (_currentPlayerIndex - 1 + Players.Count) % Players.Count)); // 當前玩家手牌的 PlayerId
 
 
     public Node2D DropZonePileNode;
