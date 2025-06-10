@@ -195,7 +195,7 @@ public partial class GameManager : Node2D
 
     public override void _Process(double delta)
     {
-        TestButtonGroup.Visible = TestMode;
+        // TestButtonGroup.Visible = TestMode;
 
         if (_draggedCard == null && !ColorSelector.Visible && !GameOverUI.Visible)
         {
@@ -259,10 +259,15 @@ public partial class GameManager : Node2D
             Players.Add(newPlayer);
         }
 
+        var random = new Random();
+        MyPlayer = Players[random.Next(Players.Count)];
+        MyPlayerNameLabel.Text = MyPlayer.Name;
+
         foreach (var player in Players)
         {
-            if (player.PlayerId != CurrentPlayerId)
+            if (player.PlayerId != MyPlayer.PlayerId)
             {
+                player.IsComputerPlayer = true;
                 await _gameStateMachine.DealingCardsToPlayerAsync(player, 7, false, false);
             }
             else
@@ -316,13 +321,17 @@ public partial class GameManager : Node2D
         for (int i = 0; i < Players.Count; i++)
         {
             var player = Players[i];
-            if (player.PlayerSeqNo == _currentPlayerIndex)
+            var condition = TestMode ? player.PlayerSeqNo == _currentPlayerIndex : player == MyPlayer;
             {
-                player.SetHandCardsInteractive(true);
-            }
-            else
-            {
-                player.SetHandCardsInteractive(false);
+                // if (player.PlayerSeqNo == _currentPlayerIndex)
+                if (condition)
+                {
+                    player.SetHandCardsInteractive(true);
+                }
+                else
+                {
+                    player.SetHandCardsInteractive(false);
+                }
             }
         }
     }
@@ -489,26 +498,118 @@ public partial class GameManager : Node2D
                || (card.CardType == topCard.CardType && card.Number == topCard.Number);
     }
 
+
     public async Task CardEffect(Card card)
     {
+
+        if (card.CardType == CardType.Wild)
+        {
+            if (CurrentPlayer == MyPlayer)
+            {
+                CardColor selectColor = await ColorSelector.ShowAndWait();
+                card.CardColor = selectColor; // 更新卡片顏色
+                card.SetWildColor(selectColor);
+            }
+            else
+            {
+                // 如果是電腦玩家，隨機選擇顏色
+                GD.Randomize();
+                var index = (int)(GD.Randi() % 4); // 0 ~ 3 對應 Red, Yellow, Green, Blue
+                var randomColor = (CardColor)index;
+                card.SetWildColor(randomColor);
+            }
+            NextTurn();
+
+        }
+        else if (card.CardType == CardType.WildDrawFour)
+        {
+
+            if (CurrentPlayer == MyPlayer)
+            {
+                CardColor selectColor = await ColorSelector.ShowAndWait();
+                card.CardColor = selectColor; // 更新卡片顏色
+                card.SetWildColor(selectColor);
+            }
+            else
+            {
+                // 如果是電腦玩家，隨機選擇顏色
+                GD.Randomize();
+                var index = (int)(GD.Randi() % 4); // 0 ~ 3 對應 Red, Yellow, Green, Blue
+                var randomColor = (CardColor)index;
+                card.SetWildColor(randomColor);
+            }
+            NextTurn();
+            if (CurrentPlayer == MyPlayer)
+            {
+                await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 4);
+                await CurrentPlayer.ReorderHand();
+            }
+            else
+            {
+                await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 4, false, false);
+            }
+            SetCurrentPlayerHandActive();
+
+        }
+        else if (card.CardType == CardType.DrawTwo)
+        {
+
+            NextTurn();
+            if (CurrentPlayer == MyPlayer)
+            {
+                await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 2);
+                await CurrentPlayer.ReorderHand();
+            }
+            else
+            {
+                await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 2, false, false);
+            }
+            SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.Skip)
+        {
+
+            NextTurn(2);
+
+            SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.Reverse)
+        {
+
+
+            await ReverseDirection();
+            NextTurn();
+            SetCurrentPlayerHandActive();
+        }
+        else
+        {
+            NextTurn();
+        }
+    }
+
+    public async Task TestCardEffect(Card card)
+    {
+
         if (card.CardType == CardType.Wild)
         {
             CardColor selectColor = await ColorSelector.ShowAndWait();
             card.CardColor = selectColor; // 更新卡片顏色
             card.SetWildColor(selectColor);
-
             NextTurn();
+
             ShowCurrentPlayerCard();
             SetCurrentPlayerHandActive();
+
         }
         else if (card.CardType == CardType.WildDrawFour)
         {
+
             CardColor selectColor = await ColorSelector.ShowAndWait();
             card.CardColor = selectColor; // 更新卡片顏色
             card.SetWildColor(selectColor);
             NextTurn();
-
             ShowCurrentPlayerCard();
+
             await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 4);
             await CurrentPlayer.ReorderHand();
             SetCurrentPlayerHandActive();
@@ -516,31 +617,77 @@ public partial class GameManager : Node2D
         }
         else if (card.CardType == CardType.DrawTwo)
         {
-            NextTurn();
 
-            ShowCurrentPlayerCard();
+            NextTurn();
+            if (TestMode) ShowCurrentPlayerCard();
             await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 2);
             await CurrentPlayer.ReorderHand();
             SetCurrentPlayerHandActive();
         }
         else if (card.CardType == CardType.Skip)
         {
+
             NextTurn(2);
 
-            ShowCurrentPlayerCard();
+            if (TestMode) ShowCurrentPlayerCard();
             SetCurrentPlayerHandActive();
         }
         else if (card.CardType == CardType.Reverse)
         {
+
+
             await ReverseDirection();
             NextTurn();
-            ShowCurrentPlayerCard();
+            if (TestMode) ShowCurrentPlayerCard();
             SetCurrentPlayerHandActive();
         }
         else
         {
             NextTurn();
-            ShowCurrentPlayerCard();
+            if (TestMode) ShowCurrentPlayerCard();
+        }
+    }
+
+    public async Task ComPlayerCardEffect(Card card)
+    {
+
+        if (card.CardType == CardType.Wild)
+        {
+            NextTurn();
+            SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.WildDrawFour)
+        {
+
+            NextTurn();
+            await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 4, false, false);
+            SetCurrentPlayerHandActive();
+
+        }
+        else if (card.CardType == CardType.DrawTwo)
+        {
+
+            NextTurn();
+            await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 2, false, false);
+            SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.Skip)
+        {
+
+            NextTurn(2);
+            SetCurrentPlayerHandActive();
+        }
+        else if (card.CardType == CardType.Reverse)
+        {
+
+
+            await ReverseDirection();
+            NextTurn();
+            SetCurrentPlayerHandActive();
+        }
+        else
+        {
+            NextTurn();
         }
     }
 }

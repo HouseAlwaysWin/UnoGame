@@ -8,6 +8,7 @@ public partial class Player : Node2D
 {
     public int PlayerSeqNo;
     public string PlayerId;
+    public bool IsComputerPlayer = false;
     private GameManager _gameManager;
     public Tween ReorderHandeTween;
 
@@ -41,7 +42,9 @@ public partial class Player : Node2D
         }
     }
 
-    public async void DealCard()
+
+
+    public async void ComPlayerDealCard()
     {
         var handCards = GetPlayerHandCards();
         List<Card> validCards = handCards.Where(c => _gameManager.CanPlaceCard(c)).ToList();
@@ -55,6 +58,10 @@ public partial class Player : Node2D
 
         if (firstCard.CardType == CardType.Wild || firstCard.CardType == CardType.WildDrawFour)
         {
+            GD.Randomize();
+            var index = (int)(GD.Randi() % 4); // 0 ~ 3 對應 Red, Yellow, Green, Blue
+            var randomColor = (CardColor)index;
+            firstCard.SetWildColor(randomColor);
             return;
         }
     }
