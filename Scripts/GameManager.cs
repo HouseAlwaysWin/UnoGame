@@ -25,6 +25,9 @@ public partial class GameManager : Node2D
     public Player CurrentPlayer =>
         Players.FirstOrDefault(p => p.PlayerSeqNo == _currentPlayerIndex); // 當前玩家手牌的 PlayerId
 
+    public Player MyPlayer;
+    public Label MyPlayerNameLabel;
+
     public CardColor CurrentSelectedColor;
 
     public Player NextPlayer =>
@@ -117,6 +120,7 @@ public partial class GameManager : Node2D
         DropZonePileNode = GetNode<DropZone>("DropZonePile");
 
         PlayerInfoPanel = GetNode<VBoxContainer>("UI/UIRoot/PlayerInfoPanel");
+        MyPlayerNameLabel = GetNode<Label>("UI/UIRoot/MyPlayerNameLabel");
         // 初始狀態交給 StateMachine 處理
         _gameStateMachine = GetNode<GameStateMachine>("GameStateMachine");
         _gameStateMachine.ChangeState(GameState.Init);

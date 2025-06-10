@@ -68,7 +68,7 @@ offset_bottom = 685.0
 theme_override_font_sizes/font_size = 50
 text = "Pass"
 
-[node name="MyPlayer" type="Label" parent="UI/UIRoot"]
+[node name="MyPlayerNameLabel" type="Label" parent="UI/UIRoot"]
 layout_mode = 0
 offset_left = 39.0
 offset_top = 705.0
