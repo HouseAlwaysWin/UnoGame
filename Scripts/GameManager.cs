@@ -77,15 +77,38 @@ public partial class GameManager : Node2D
 
     public override async void _Ready()
     {
+        InitUI();
+        BindTestButtons();
+        await InitStateMachineAsync();
+    }
+
+    private void InitUI()
+    {
         // DebugHelper.WaitForDebugger();
         ColorSelector = GetNode<WildColorSelector>("UI/UIRoot/ColorSelector");
         ColorSelector.Visible = false;
-
 
         PlayerZone = GetNode<Node2D>("PlayerZone");
         DeckPileNode = GetNode<Node2D>("DeckPile"); // 在主場景加一個 DeckPile 節點
         PlayerHandZone = GetNode<Node2D>("PlayerHandZone");
         TestButtonGroup = GetNode<VBoxContainer>("UI/UIRoot/TestButtonGroup");
+
+        PassButton = GetNode<Button>("UI/UIRoot/PassButton");
+        GameOverUI = GetNode<Control>("UI/UIRoot/GameOverUI");
+
+        _directionArrow = GetNode<Node2D>("DirectionArrow");
+        _directionArrow.RotationDegrees = 90;
+        _arrowRotation = 90;
+
+        DropZoneArea = GetNode<Area2D>("DropZonePile/DropZoneArea");
+        DropZonePileNode = GetNode<DropZone>("DropZonePile");
+
+        PlayerInfoPanel = GetNode<VBoxContainer>("UI/UIRoot/PlayerInfoPanel");
+        MyPlayerNameLabel = GetNode<Label>("UI/UIRoot/MyPlayerNameLabel");
+    }
+
+    private void BindTestButtons()
+    {
         _playButton = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton");
         _playButton.Pressed += OnPassButton;
 
@@ -110,26 +133,15 @@ public partial class GameManager : Node2D
         _playButton8 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton8");
         _playButton8.Pressed += onPlayButtonPressed8;
 
-        PassButton = GetNode<Button>("UI/UIRoot/PassButton");
         PassButton.Pressed += OnPassButton;
+    }
 
-        GameOverUI = GetNode<Control>("UI/UIRoot/GameOverUI");
-
-        _directionArrow = GetNode<Node2D>("DirectionArrow");
-        _directionArrow.RotationDegrees = 90;
-        _arrowRotation = 90;
-
-        DropZoneArea = GetNode<Area2D>("DropZonePile/DropZoneArea");
-        DropZonePileNode = GetNode<DropZone>("DropZonePile");
-
-        PlayerInfoPanel = GetNode<VBoxContainer>("UI/UIRoot/PlayerInfoPanel");
-        MyPlayerNameLabel = GetNode<Label>("UI/UIRoot/MyPlayerNameLabel");
-        // 初始狀態交給 StateMachine 處理
+    private async Task InitStateMachineAsync()
+    {
         _gameStateMachine = GetNode<GameStateMachine>("GameStateMachine");
         _gameStateMachine.ChangeState(GameState.Init);
         _gameStateMachine.ChangeState(GameState.DealCards);
-
-
+        await Task.CompletedTask;
     }
 
 
