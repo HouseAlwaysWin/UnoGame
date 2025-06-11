@@ -7,7 +7,11 @@ public partial class GameOverUI : Control
     {
         // Ensure this UI continues to receive input even when the
         // scene tree is paused after the game ends.
-        PauseMode = PauseModeEnum.Process;
+        // `ProcessMode` replaces `PauseMode` in Godot 4 to control
+        // whether the node processes while the scene tree is paused.
+        // Using `Always` allows the UI to respond regardless of the
+        // tree's paused state.
+        ProcessMode = ProcessModeEnum.Always;
     }
 
     public override void _Input(InputEvent @event)
