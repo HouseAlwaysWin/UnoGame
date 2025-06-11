@@ -23,6 +23,11 @@ public partial class GameStateMachine : Node
 
     public GameState CurrentState { get; private set; }
 
+    /// <summary>
+    /// The card that has been played and awaiting resolution.
+    /// </summary>
+    public Card? CurrentPlayedCard { get; set; }
+
     public override void _Ready()
     {
         _gameManager = GetParent<GameManager>();

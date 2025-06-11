@@ -81,15 +81,9 @@ public partial class DragManager : Node2D
                     var dropZoneTopCard = _dropZone.GetTopCardInDropZone();
                     dropZoneTopCard.ResetBorder();
                     card.IsInteractive = false;
-                    // var playerHand = card.GetParentOrNull<Player>();
-                    // if (playerHand == null) return;
-                    var playerHand = _gameManager.CurrentPlayer;
 
-                    await _gameManager.MoveCardToTarget(card, playerHand, _dropZone,
-                        showAnimation: false);
-                    await playerHand.ReorderHand();
-
-                    await _gameManager.CardEffect(card);
+                    _gameStateMachine.CurrentPlayedCard = card;
+                    await _gameStateMachine.ChangeState(GameState.PlayerPlayCard);
                     return;
                 }
             }

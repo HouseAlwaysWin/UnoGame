@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Godot;
 
 public class GameOverState : BaseGameState
 {
@@ -6,6 +7,9 @@ public class GameOverState : BaseGameState
 
     public override Task EnterState()
     {
+        GameManager.GameOverUI.GetNode<Label>("PanelContainer/VBoxContainer/PlayerWinLabel").Text = $"{GameManager.CurrentPlayer.Name} wins!";
+        GameManager.GameOverUI.Visible = true;
+        GameManager.GetTree().Paused = true;
         return Task.CompletedTask;
     }
 }
