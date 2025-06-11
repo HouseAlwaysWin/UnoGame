@@ -594,7 +594,14 @@ public partial class GameManager : Node2D
         else if (card.CardType == CardType.Reverse)
         {
             await ReverseDirection();
-            NextTurn();
+            if (Players.Count == 2)
+            {
+                NextTurn(2);
+            }
+            else
+            {
+                NextTurn();
+            }
             // SetCurrentPlayerHandActive();
         }
         else
@@ -664,7 +671,14 @@ public partial class GameManager : Node2D
 
 
             await ReverseDirection();
-            NextTurn();
+            if (Players.Count == 2)
+            {
+                NextTurn(2);
+            }
+            else
+            {
+                NextTurn();
+            }
             if (TestMode) ShowCurrentPlayerCard();
             SetCurrentPlayerHandActive();
         }
