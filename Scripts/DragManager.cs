@@ -90,7 +90,6 @@ public partial class DragManager : Node2D
                     await playerHand.ReorderHand();
 
                     await _gameManager.CardEffect(card);
-                    _gameManager.IsPlayerWin();
                     return;
                 }
             }
