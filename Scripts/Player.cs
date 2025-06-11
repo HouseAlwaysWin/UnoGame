@@ -46,7 +46,8 @@ public partial class Player : Node2D
 
     public async void ComPlayerDealCard()
     {
-
+        var topCard = _gameManager.DropZonePileNode.GetTopCardInDropZone();
+        topCard.ResetBorder();
         var handCards = GetPlayerHandCards();
         List<Card> validCards = handCards.Where(c => _gameManager.CanPlaceCard(c)).ToList();
         if (validCards.Count == 0)

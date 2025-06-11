@@ -315,7 +315,6 @@ public partial class GameManager : Node2D
         }
 
         UpdateCurrentPlayerUI();
-        SetCurrentPlayerHandActive();
         if (isWin) return;
 
         if (CurrentPlayer != MyPlayer)
@@ -326,7 +325,7 @@ public partial class GameManager : Node2D
 
     public void UpdateCurrentPlayerUI()
     {
-
+        SetCurrentPlayerHandActive();
         PassButton.Disabled = CurrentPlayer != MyPlayer;
         for (int i = 0; i < PlayerUIInfos.Count; i++)
         {
@@ -345,17 +344,13 @@ public partial class GameManager : Node2D
         for (int i = 0; i < Players.Count; i++)
         {
             var player = Players[i];
-            var condition = TestMode ? player.PlayerSeqNo == _currentPlayerIndex : player == MyPlayer;
+            if (player.PlayerSeqNo == _currentPlayerIndex)
             {
-                // if (player.PlayerSeqNo == _currentPlayerIndex)
-                if (condition)
-                {
-                    player.SetHandCardsInteractive(true);
-                }
-                else
-                {
-                    player.SetHandCardsInteractive(false);
-                }
+                player.SetHandCardsInteractive(true);
+            }
+            else
+            {
+                player.SetHandCardsInteractive(false);
             }
         }
     }
