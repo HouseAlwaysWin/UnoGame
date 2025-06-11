@@ -568,7 +568,7 @@ public partial class GameManager : Node2D
             {
                 await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 4, false, false);
             }
-            NextTurn();
+            NextTurn(2);
             // SetCurrentPlayerHandActive();
 
         }
@@ -583,7 +583,7 @@ public partial class GameManager : Node2D
             {
                 await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 2, false, false);
             }
-            NextTurn();
+            NextTurn(2);
         }
         else if (card.CardType == CardType.Skip)
         {
