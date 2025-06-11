@@ -30,8 +30,9 @@ public class CheckWinOrNextTurnState : BaseGameState
             }
         }
 
-        GameManager.NextTurn(skip);
         StateMachine.CurrentPlayedCard = null;
+        GameManager.NextTurn(skip);
+
 
         await StateMachine.ChangeState(GameState.WaitForPlayerAction);
     }
