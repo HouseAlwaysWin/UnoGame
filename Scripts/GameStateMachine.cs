@@ -90,7 +90,7 @@ public partial class GameStateMachine : Node
         for (int i = 0; i < 4; i++)
         {
             string wildName = $"{CardType.Wild.ToString().ToLower()}";
-            string wildDrawFourName = $"{CardType.WildDrawFour.ToString().ToLowerlCamelCase()}";
+            string wildDrawFourName = $"{CardType.WildDrawFour.ToString().ToLowerCamelCase()}";
             _gameManager.Deck.Add(_gameManager.CreateCard(wildName, CardColor.Wild, CardType.Wild, 13));
             _gameManager.Deck.Add(_gameManager.CreateCard(wildDrawFourName, CardColor.Wild, CardType.WildDrawFour, 14));
         }
