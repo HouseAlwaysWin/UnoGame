@@ -70,6 +70,7 @@ public partial class GameManager : Node2D
 
     private Card _currentTopCard; // 新增
     private GameStateMachine _gameStateMachine;
+    public GameStateMachine StateMachine => _gameStateMachine;
     public WildColorSelector ColorSelector;
     public VBoxContainer TestButtonGroup;
     public Button PassButton;
@@ -315,7 +316,6 @@ public partial class GameManager : Node2D
 
     public void NextTurn(int skip = 1)
     {
-        var isWin = IsPlayerWin();
         if (_isClockwise)
         {
             _currentPlayerIndex = (_currentPlayerIndex + skip) % Players.Count;
@@ -326,7 +326,6 @@ public partial class GameManager : Node2D
         }
 
         UpdateCurrentPlayerUI();
-        if (isWin) return;
 
         if (CurrentPlayer != MyPlayer)
         {
@@ -529,107 +528,10 @@ public partial class GameManager : Node2D
     }
 
 
-    public async Task CardEffect(Card card)
-    {
-
-        if (card.CardType == CardType.Wild)
-        {
-            if (CurrentPlayer == MyPlayer)
-            {
-                CardColor selectColor = await ColorSelector.ShowAndWait();
-                card.CardColor = selectColor; // 更新卡片顏色
-                card.SetWildColor(selectColor);
-            }
-            else
-            {
-                // 如果是電腦玩家，隨機選擇顏色
-                GD.Randomize();
-                var index = (int)(GD.Randi() % 4); // 0 ~ 3 對應 Red, Yellow, Green, Blue
-                var randomColor = (CardColor)index;
-                card.SetWildColor(randomColor);
-            }
-            NextTurn();
-
-        }
-        else if (card.CardType == CardType.WildDrawFour)
-        {
-
-            if (CurrentPlayer == MyPlayer)
-            {
-                CardColor selectColor = await ColorSelector.ShowAndWait();
-                card.CardColor = selectColor; // 更新卡片顏色
-                card.SetWildColor(selectColor);
-
-            }
-            else
-            {
-                // 如果是電腦玩家，隨機選擇顏色
-                GD.Randomize();
-                var index = (int)(GD.Randi() % 4); // 0 ~ 3 對應 Red, Yellow, Green, Blue
-                var randomColor = (CardColor)index;
-                card.SetWildColor(randomColor);
-            }
-
-            if (NextPlayer == MyPlayer)
-            {
-                await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 4);
-                await NextPlayer.ReorderHand();
-            }
-            else
-            {
-                await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 4, false, false);
-            }
-            NextTurn(2);
-            // SetCurrentPlayerHandActive();
-
-        }
-        else if (card.CardType == CardType.DrawTwo)
-        {
-            if (NextPlayer == MyPlayer)
-            {
-                await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 2);
-                await NextPlayer.ReorderHand();
-            }
-            else
-            {
-                await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 2, false, false);
-            }
-            NextTurn(2);
-        }
-        else if (card.CardType == CardType.Skip)
-        {
-
-            NextTurn(2);
-            // SetCurrentPlayerHandActive();
-        }
-        else if (card.CardType == CardType.Reverse)
-        {
-            await ReverseDirection();
-            if (Players.Count == 2)
-            {
-                NextTurn(2);
-            }
-            else
-            {
-                NextTurn();
-            }
-            // SetCurrentPlayerHandActive();
-        }
-        else
-        {
-            NextTurn();
-        }
-    }
 
     public bool IsPlayerWin()
     {
-        if (CurrentPlayer.GetPlayerHandCards().Count == 0)
-        {
-            GameOverUI.GetNode<Label>("PanelContainer/VBoxContainer/PlayerWinLabel").Text = $"{CurrentPlayer.Name} wins!";
-            GameOverUI.Visible = true;
-            return true;
-        }
-        return false;
+        return CurrentPlayer.GetPlayerHandCards().Count == 0;
     }
 
     public async Task TestCardEffect(Card card)
