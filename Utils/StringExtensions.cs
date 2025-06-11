@@ -3,7 +3,7 @@ namespace GodotHelper
 {
     public static class StringExtensions
     {
-        public static string ToCamelCase(this string s)
+        public static string ToLowerlCamelCase(this string s)
         {
             if (string.IsNullOrEmpty(s) || char.IsLower(s[0]))
             {
