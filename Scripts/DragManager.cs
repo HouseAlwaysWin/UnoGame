@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-public partial class DargManager : Node2D
+public partial class DragManager : Node2D
 {
     [Export] public NodePath GameManagerPath;
     [Export] public NodePath DropZonePath;

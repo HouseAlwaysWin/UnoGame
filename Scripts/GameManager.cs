@@ -72,6 +72,7 @@ public partial class GameManager : Node2D
     private GameStateMachine _gameStateMachine;
     public WildColorSelector ColorSelector;
     public VBoxContainer TestButtonGroup;
+    public Button PassButton;
 
 
     public override async void _Ready()
@@ -86,7 +87,7 @@ public partial class GameManager : Node2D
         PlayerHandZone = GetNode<Node2D>("PlayerHandZone");
         TestButtonGroup = GetNode<VBoxContainer>("UI/UIRoot/TestButtonGroup");
         _playButton = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton");
-        _playButton.Pressed += OnPlayButtonPressed;
+        _playButton.Pressed += OnPassButton;
 
         _playButton2 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton2");
         _playButton2.Pressed += onPlayButtonPressed2;
@@ -109,7 +110,9 @@ public partial class GameManager : Node2D
         _playButton8 = GetNode<Button>("UI/UIRoot/TestButtonGroup/PlayButton8");
         _playButton8.Pressed += onPlayButtonPressed8;
 
-        GetNode<Button>("UI/UIRoot/PassButton").Pressed += OnPlayButtonPressed;
+        PassButton = GetNode<Button>("UI/UIRoot/PassButton");
+        PassButton.Pressed += OnPassButton;
+
         GameOverUI = GetNode<Control>("UI/UIRoot/GameOverUI");
 
         _directionArrow = GetNode<Node2D>("DirectionArrow");
@@ -130,8 +133,9 @@ public partial class GameManager : Node2D
     }
 
 
-    private async void OnPlayButtonPressed()
+    private async void OnPassButton()
     {
+        PassButton.Disabled = true;
         OnPassed();
     }
 
@@ -275,11 +279,11 @@ public partial class GameManager : Node2D
             if (player.PlayerId != MyPlayer.PlayerId)
             {
                 player.IsComputerPlayer = true;
-                await _gameStateMachine.DealingCardsToPlayerAsync(player, 7, false, false);
+                await _gameStateMachine.DealingCardsToPlayerAsync(player, CardsToDeal, false, false);
             }
             else
             {
-                await _gameStateMachine.DealingCardsToPlayerAsync(player, 7, true, true);
+                await _gameStateMachine.DealingCardsToPlayerAsync(player, CardsToDeal, true, true);
             }
         }
 
@@ -300,6 +304,7 @@ public partial class GameManager : Node2D
 
     public void NextTurn(int skip = 1)
     {
+        var isWin = IsPlayerWin();
         if (_isClockwise)
         {
             _currentPlayerIndex = (_currentPlayerIndex + skip) % Players.Count;
@@ -311,6 +316,8 @@ public partial class GameManager : Node2D
 
         UpdateCurrentPlayerUI();
         SetCurrentPlayerHandActive();
+        if (isWin) return;
+
         if (CurrentPlayer != MyPlayer)
         {
             CurrentPlayer.ComPlayerDealCard();
@@ -319,6 +326,8 @@ public partial class GameManager : Node2D
 
     public void UpdateCurrentPlayerUI()
     {
+
+        PassButton.Disabled = CurrentPlayer != MyPlayer;
         for (int i = 0; i < PlayerUIInfos.Count; i++)
         {
             var playerUI = PlayerUIInfos[i];
@@ -599,13 +608,15 @@ public partial class GameManager : Node2D
         }
     }
 
-    public void IsPlayerWin()
+    public bool IsPlayerWin()
     {
         if (CurrentPlayer.GetPlayerHandCards().Count == 0)
         {
             GameOverUI.GetNode<Label>("PanelContainer/VBoxContainer/PlayerWinLabel").Text = $"{CurrentPlayer.Name} wins!";
             GameOverUI.Visible = true;
+            return true;
         }
+        return false;
     }
 
     public async Task TestCardEffect(Card card)

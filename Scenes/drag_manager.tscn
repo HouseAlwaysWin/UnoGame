@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://burctgohhuxne"]
 
-[ext_resource type="Script" uid="uid://dhk422suhagna" path="res://Scripts/DargManager.cs" id="1_kryms"]
+[ext_resource type="Script" uid="uid://d34j4mgitmo3d" path="res://Scripts/DragManager.cs" id="1_kryms"]
 
 [node name="DragManager" type="Node2D"]
 script = ExtResource("1_kryms")

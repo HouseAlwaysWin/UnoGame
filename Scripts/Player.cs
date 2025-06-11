@@ -46,6 +46,7 @@ public partial class Player : Node2D
 
     public async void ComPlayerDealCard()
     {
+
         var handCards = GetPlayerHandCards();
         List<Card> validCards = handCards.Where(c => _gameManager.CanPlaceCard(c)).ToList();
         if (validCards.Count == 0)
