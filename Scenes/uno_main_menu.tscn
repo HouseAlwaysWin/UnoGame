@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://cxr2ji3sml020"]
+[gd_scene load_steps=7 format=3 uid="uid://0gwiaijq4vhi"]
 
 [ext_resource type="Script" uid="uid://dxbgqichvs0i4" path="res://Scripts/UnoMainMenu.cs" id="1_8tv3j"]
 
@@ -99,10 +99,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -36.0
-offset_top = -33.0
-offset_right = 36.0
-offset_bottom = 33.0
+offset_left = -136.0
+offset_top = 8.0
+offset_right = 133.0
+offset_bottom = 339.0
 grow_horizontal = 2
 grow_vertical = 2
 

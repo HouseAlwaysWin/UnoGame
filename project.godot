@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="UnoCardGame"
-run/main_scene="uid://dxobqmv5p3elk"
+run/main_scene="uid://0gwiaijq4vhi"
 config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+NetworkManager="*res://Scripts/NetworkManager.cs"
 
 [display]
 
@@ -23,6 +27,3 @@ window/size/viewport_height=800
 [dotnet]
 
 project/assembly_name="UnoCardGame"
-
-[autoload]
-NetworkManager="*res://Scripts/NetworkManager.cs"

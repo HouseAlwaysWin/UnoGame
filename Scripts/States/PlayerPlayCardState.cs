@@ -23,7 +23,7 @@ public class PlayerPlayCardState : BaseGameState
                 await GameManager.MoveCardToTarget(card, fromNode, GameManager.DropZonePileNode,
                     showAnimation: animate);
 
-                if (Multiplayer.IsServer())
+                if (GameManager.Multiplayer.IsServer())
                     GameManager.Rpc(nameof(GameManager.RpcPlayCard), playerHand.PlayerSeqNo, index);
 
                 await playerHand.ReorderHand();

@@ -5,7 +5,7 @@ public partial class NetworkManager : Node
     [Export] public int Port = 8910;
     [Export] public int MaxPlayers = 4;
 
-    private SceneMultiplayer _multiplayer = new SceneMultiplayer();
+    private ENetMultiplayerPeer _multiplayer;
 
     public static NetworkManager Instance { get; private set; }
 
@@ -16,7 +16,6 @@ public partial class NetworkManager : Node
 
     public override void _Ready()
     {
-        CustomMultiplayer = _multiplayer;
         Multiplayer.PeerConnected += OnPeerConnected;
         Multiplayer.PeerDisconnected += OnPeerDisconnected;
     }
@@ -25,7 +24,7 @@ public partial class NetworkManager : Node
     {
         var peer = new ENetMultiplayerPeer();
         peer.CreateServer(Port, MaxPlayers);
-        _multiplayer.MultiplayerPeer = peer;
+        Multiplayer.MultiplayerPeer = peer;
         GD.Print($"Hosting game on port {Port}");
     }
 
@@ -33,7 +32,7 @@ public partial class NetworkManager : Node
     {
         var peer = new ENetMultiplayerPeer();
         peer.CreateClient(address, Port);
-        _multiplayer.MultiplayerPeer = peer;
+        Multiplayer.MultiplayerPeer = peer;
         GD.Print($"Joining {address}:{Port}");
     }
 
