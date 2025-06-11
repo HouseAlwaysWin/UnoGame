@@ -81,29 +81,22 @@ public partial class DargManager : Node2D
                     var dropZoneTopCard = _dropZone.GetTopCardInDropZone();
                     dropZoneTopCard.ResetBorder();
                     card.IsInteractive = false;
-                    var playerHand = card.GetParentOrNull<Player>();
-                    if (playerHand == null) return;
+                    // var playerHand = card.GetParentOrNull<Player>();
+                    // if (playerHand == null) return;
+                    var playerHand = _gameManager.CurrentPlayer;
 
                     await _gameManager.MoveCardToTarget(card, playerHand, _dropZone,
                         showAnimation: false);
                     await playerHand.ReorderHand();
 
                     await _gameManager.CardEffect(card);
-
-                    if (playerHand.GetPlayerHandCards().Count == 0)
-                    {
-                        _gameManager.GameOverUI.GetNode<Label>("PanelContainer/VBoxContainer/PlayerWinLabel").Text = $"{playerHand.Name} wins!";
-                        _gameManager.GameOverUI.Visible = true;
-                    }
-
-                    GD.Print("Card dropped in valid zone");
+                    _gameManager.IsPlayerWin();
                     return;
                 }
             }
         }
 
         // 沒有放到正確區域：回原位、ZIndex 還原
-        GD.Print("Card dropped outside zone, returning");
         await card.CardAnimator.TweenTo(card.OriginalPosition, 0.2f);
         card.ReturnToOriginalZ();
         // await Task.Delay(100); // 微延遲防止立即觸發 Hover

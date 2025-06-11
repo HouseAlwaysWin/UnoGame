@@ -185,11 +185,18 @@ public partial class GameManager : Node2D
 
     public async void OnPassed()
     {
-        await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer);
-        CurrentPlayer.SetHandCardsInteractive(true);
-        await CurrentPlayer.ReorderHand();
+        if (CurrentPlayer == MyPlayer)
+        {
+            await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer);
+            await CurrentPlayer.ReorderHand();
+        }
+        else
+        {
+            await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 1, false, false);
+        }
+        // CurrentPlayer.SetHandCardsInteractive(true);
         NextTurn();
-        ShowCurrentPlayerCard();
+        // ShowCurrentPlayerCard();
     }
 
 
@@ -278,6 +285,10 @@ public partial class GameManager : Node2D
 
         UpdateCurrentPlayerUI();
         _currentPlayerIndex = 0;
+        if (CurrentPlayer != MyPlayer)
+        {
+            CurrentPlayer.ComPlayerDealCard();
+        }
 
         // 2. 打亂 _players 順序（遊戲邏輯用）
         // var rng = new Random();
@@ -300,6 +311,10 @@ public partial class GameManager : Node2D
 
         UpdateCurrentPlayerUI();
         SetCurrentPlayerHandActive();
+        if (CurrentPlayer != MyPlayer)
+        {
+            CurrentPlayer.ComPlayerDealCard();
+        }
     }
 
     public void UpdateCurrentPlayerUI()
@@ -529,6 +544,7 @@ public partial class GameManager : Node2D
                 CardColor selectColor = await ColorSelector.ShowAndWait();
                 card.CardColor = selectColor; // 更新卡片顏色
                 card.SetWildColor(selectColor);
+
             }
             else
             {
@@ -538,52 +554,57 @@ public partial class GameManager : Node2D
                 var randomColor = (CardColor)index;
                 card.SetWildColor(randomColor);
             }
-            NextTurn();
-            if (CurrentPlayer == MyPlayer)
+
+            if (NextPlayer == MyPlayer)
             {
-                await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 4);
-                await CurrentPlayer.ReorderHand();
+                await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 4);
+                await NextPlayer.ReorderHand();
             }
             else
             {
-                await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 4, false, false);
+                await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 4, false, false);
             }
-            SetCurrentPlayerHandActive();
+            NextTurn();
+            // SetCurrentPlayerHandActive();
 
         }
         else if (card.CardType == CardType.DrawTwo)
         {
-
-            NextTurn();
-            if (CurrentPlayer == MyPlayer)
+            if (NextPlayer == MyPlayer)
             {
-                await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 2);
-                await CurrentPlayer.ReorderHand();
+                await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 2);
+                await NextPlayer.ReorderHand();
             }
             else
             {
-                await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 2, false, false);
+                await _gameStateMachine.DealingCardsToPlayerAsync(NextPlayer, 2, false, false);
             }
-            SetCurrentPlayerHandActive();
+            NextTurn();
         }
         else if (card.CardType == CardType.Skip)
         {
 
             NextTurn(2);
-
-            SetCurrentPlayerHandActive();
+            // SetCurrentPlayerHandActive();
         }
         else if (card.CardType == CardType.Reverse)
         {
-
-
             await ReverseDirection();
             NextTurn();
-            SetCurrentPlayerHandActive();
+            // SetCurrentPlayerHandActive();
         }
         else
         {
             NextTurn();
+        }
+    }
+
+    public void IsPlayerWin()
+    {
+        if (CurrentPlayer.GetPlayerHandCards().Count == 0)
+        {
+            GameOverUI.GetNode<Label>("PanelContainer/VBoxContainer/PlayerWinLabel").Text = $"{CurrentPlayer.Name} wins!";
+            GameOverUI.Visible = true;
         }
     }
 
@@ -648,46 +669,5 @@ public partial class GameManager : Node2D
         }
     }
 
-    public async Task ComPlayerCardEffect(Card card)
-    {
 
-        if (card.CardType == CardType.Wild)
-        {
-            NextTurn();
-            SetCurrentPlayerHandActive();
-        }
-        else if (card.CardType == CardType.WildDrawFour)
-        {
-
-            NextTurn();
-            await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 4, false, false);
-            SetCurrentPlayerHandActive();
-
-        }
-        else if (card.CardType == CardType.DrawTwo)
-        {
-
-            NextTurn();
-            await _gameStateMachine.DealingCardsToPlayerAsync(CurrentPlayer, 2, false, false);
-            SetCurrentPlayerHandActive();
-        }
-        else if (card.CardType == CardType.Skip)
-        {
-
-            NextTurn(2);
-            SetCurrentPlayerHandActive();
-        }
-        else if (card.CardType == CardType.Reverse)
-        {
-
-
-            await ReverseDirection();
-            NextTurn();
-            SetCurrentPlayerHandActive();
-        }
-        else
-        {
-            NextTurn();
-        }
-    }
 }
