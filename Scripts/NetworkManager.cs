@@ -16,7 +16,7 @@ public partial class NetworkManager : Node
 
     public override void _Ready()
     {
-        Multiplayer.MultiplayerPeer = _multiplayer;
+        CustomMultiplayer = _multiplayer;
         Multiplayer.PeerConnected += OnPeerConnected;
         Multiplayer.PeerDisconnected += OnPeerDisconnected;
     }
