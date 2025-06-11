@@ -5,7 +5,9 @@ public partial class GameOverUI : Control
 {
     public override void _Ready()
     {
-
+        // Ensure this UI continues to receive input even when the
+        // scene tree is paused after the game ends.
+        PauseMode = PauseModeEnum.Process;
     }
 
     public override void _Input(InputEvent @event)
