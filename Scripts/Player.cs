@@ -56,19 +56,10 @@ public partial class Player : Node2D
             return;
         }
         var firstCard = validCards.First();
-        await _gameManager.MoveCardToTarget(firstCard, _gameManager.PlayerZone, _gameManager.DropZonePileNode);
         firstCard.IsInteractive = false;
 
-        if (firstCard.CardType == CardType.Wild || firstCard.CardType == CardType.WildDrawFour)
-        {
-            GD.Randomize();
-            var index = (int)(GD.Randi() % 4); // 0 ~ 3 對應 Red, Yellow, Green, Blue
-            var randomColor = (CardColor)index;
-            firstCard.SetWildColor(randomColor);
-            await _gameManager.CardEffect(firstCard);
-            return;
-        }
-        await _gameManager.CardEffect(firstCard);
+        _gameManager.StateMachine.CurrentPlayedCard = firstCard;
+        await _gameManager.StateMachine.ChangeState(GameState.PlayerPlayCard);
     }
 
     public async Task ReorderHand()
