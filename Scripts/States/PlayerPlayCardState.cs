@@ -11,6 +11,8 @@ public class PlayerPlayCardState : BaseGameState
         if (card != null)
         {
             var playerHand = GameManager.CurrentPlayer;
+
+            GD.Print($"狀態變化: {playerHand.Name} ➡ {card.CardType}{card.CardColor}{card.Number}");
             if (card.GetParent() != GameManager.DropZonePileNode)
             {
                 int index = playerHand.GetPlayerHandCards().IndexOf(card);
