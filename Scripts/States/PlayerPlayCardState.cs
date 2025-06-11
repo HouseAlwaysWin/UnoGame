@@ -12,9 +12,14 @@ public class PlayerPlayCardState : BaseGameState
             var playerHand = GameManager.CurrentPlayer;
             if (card.GetParent() != GameManager.DropZonePileNode)
             {
-
                 bool animate = GameManager.CurrentPlayer != GameManager.MyPlayer;
-                await GameManager.MoveCardToTarget(card, playerHand, GameManager.DropZonePileNode, showAnimation: animate);
+
+                Node2D fromNode = GameManager.CurrentPlayer == GameManager.MyPlayer
+                    ? playerHand
+                    : GameManager.PlayerZone;
+
+                await GameManager.MoveCardToTarget(card, fromNode, GameManager.DropZonePileNode,
+                    showAnimation: animate);
 
                 await playerHand.ReorderHand();
             }

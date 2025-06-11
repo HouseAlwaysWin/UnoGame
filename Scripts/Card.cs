@@ -139,7 +139,6 @@ public partial class Card : Area2D
 
     public void SetAlwaysOnTop()
     {
-        if (!IsInteractive) return;
         ZAsRelative = false; // 確保 ZIndex 是全局有效的
         ZIndex = _globalZCounter++;
     }
