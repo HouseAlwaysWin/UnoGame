@@ -13,6 +13,7 @@ public class PlayerPlayCardState : BaseGameState
             var playerHand = GameManager.CurrentPlayer;
             if (card.GetParent() != GameManager.DropZonePileNode)
             {
+                int index = playerHand.GetPlayerHandCards().IndexOf(card);
                 bool animate = GameManager.CurrentPlayer != GameManager.MyPlayer;
 
                 Node2D fromNode = GameManager.CurrentPlayer == GameManager.MyPlayer
@@ -21,6 +22,9 @@ public class PlayerPlayCardState : BaseGameState
 
                 await GameManager.MoveCardToTarget(card, fromNode, GameManager.DropZonePileNode,
                     showAnimation: animate);
+
+                if (Multiplayer.IsServer())
+                    GameManager.Rpc(nameof(GameManager.RpcPlayCard), playerHand.PlayerSeqNo, index);
 
                 await playerHand.ReorderHand();
             }

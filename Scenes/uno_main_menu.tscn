@@ -117,6 +117,26 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_272wl")
 theme_override_styles/normal = SubResource("StyleBoxFlat_272wl")
 text = "開始"
 
+[node name="HostButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 50
+theme_override_styles/hover = SubResource("StyleBoxFlat_ttl08")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_272wl")
+theme_override_styles/normal = SubResource("StyleBoxFlat_272wl")
+text = "Host Game"
+
+[node name="JoinButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 50
+theme_override_styles/hover = SubResource("StyleBoxFlat_ttl08")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_272wl")
+theme_override_styles/normal = SubResource("StyleBoxFlat_272wl")
+text = "Join Game"
+
+[node name="AddressEdit" type="LineEdit" parent="VBoxContainer"]
+layout_mode = 2
+text = "127.0.0.1"
+
 [node name="ExitButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_hover_color = Color(0, 0, 0, 1)

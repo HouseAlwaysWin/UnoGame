@@ -7,7 +7,10 @@ public class InitState : BaseGameState
     public override Task EnterState()
     {
         StateMachine.InitDeck();
-        StateMachine.ShuffleDeck(GameManager.Deck);
+        int seed = (int)Time.GetTicksMsec();
+        StateMachine.ShuffleDeck(GameManager.Deck, seed);
+        if (Multiplayer.IsServer())
+            GameManager.Rpc(nameof(GameManager.RpcShuffleDeck), seed);
         StateMachine.DisplayDeckPile();
         return Task.CompletedTask;
     }

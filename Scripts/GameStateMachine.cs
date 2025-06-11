@@ -105,9 +105,9 @@ public partial class GameStateMachine : Node
         }
     }
 
-    public void ShuffleDeck(List<Card> cards)
+    public void ShuffleDeck(List<Card> cards, int? seed = null)
     {
-        Random random = new Random();
+        Random random = seed.HasValue ? new Random(seed.Value) : new Random();
         for (int i = cards.Count - 1; i > 0; i--)
         {
             int j = random.Next(i + 1);
@@ -119,8 +119,16 @@ public partial class GameStateMachine : Node
     public async Task DealingCardsToPlayerAsync(Player? playerHand = null, int dealNum = 1, bool showAnimation = true,
         bool showCard = true)
     {
-        await _gameManager.MoveCardsToTarget(_gameManager.Deck, dealNum, _gameManager.DeckPileNode, playerHand,
-            offset: (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); }, showAnimation: showAnimation,
-            showCard: showCard);
+        for (int i = 0; i < dealNum; i++)
+        {
+            Card card = _gameManager.Deck.FirstOrDefault();
+            if (card == null) break;
+            _gameManager.Deck.RemoveAt(0);
+            if (Multiplayer.IsServer())
+                _gameManager.Rpc(nameof(GameManager.RpcDealCardToPlayer), playerHand.PlayerSeqNo);
+            await _gameManager.MoveCardToTarget(card, _gameManager.DeckPileNode, playerHand,
+                showAnimation: showAnimation, showCard: showCard,
+                offset: new Vector2(i * _gameManager.CardSpacing, 0));
+        }
     }
 }

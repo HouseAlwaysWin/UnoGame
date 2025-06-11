@@ -17,6 +17,8 @@ public partial class GameManager : Node2D
 
     public List<Card> Deck = new();
     public List<Player> Players = new();
+
+    private static int _cardCounter = 0;
     public Node2D PlayerHandZone;
     private DropZone _dropZone;
     public CardColor CurrentCardColor;
@@ -325,6 +327,9 @@ public partial class GameManager : Node2D
             _currentPlayerIndex = (_currentPlayerIndex - skip + Players.Count) % Players.Count;
         }
 
+        if (Multiplayer.IsServer())
+            Rpc(nameof(RpcSetTurn), _currentPlayerIndex, _isClockwise);
+
         UpdateCurrentPlayerUI();
 
         if (CurrentPlayer != MyPlayer)
@@ -450,7 +455,8 @@ public partial class GameManager : Node2D
         var cardScence = GD.Load<PackedScene>("res://Scenes/card.tscn");
         var newCard = cardScence.Instantiate<Card>();
         newCard.InstantiateCard(cardImgName, cardColor, cardType, cardNumber);
-        newCard.Name = $"{cardColor}{cardType}{cardNumber}";
+        newCard.Id = $"card_{_cardCounter++}";
+        newCard.Name = newCard.Id;
         newCard.ZIndex = zindex;
         return newCard;
     }
@@ -600,6 +606,39 @@ public partial class GameManager : Node2D
             NextTurn();
             if (TestMode) ShowCurrentPlayerCard();
         }
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+    public void RpcShuffleDeck(int seed)
+    {
+        _gameStateMachine.ShuffleDeck(Deck, seed);
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+    public async void RpcDealCardToPlayer(int playerSeq)
+    {
+        var player = Players[playerSeq];
+        var card = Deck.First();
+        Deck.RemoveAt(0);
+        await MoveCardToTarget(card, DeckPileNode, player, false, true);
+        await player.ReorderHand();
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+    public async void RpcPlayCard(int playerSeq, int cardIndex)
+    {
+        var player = Players[playerSeq];
+        var card = player.GetPlayerHandCards()[cardIndex];
+        await MoveCardToTarget(card, player, DropZonePileNode, false, true);
+        await player.ReorderHand();
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+    public void RpcSetTurn(int index, bool clockwise)
+    {
+        _currentPlayerIndex = index;
+        _isClockwise = clockwise;
+        UpdateCurrentPlayerUI();
     }
 
 

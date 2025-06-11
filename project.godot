@@ -23,3 +23,6 @@ window/size/viewport_height=800
 [dotnet]
 
 project/assembly_name="UnoCardGame"
+
+[autoload]
+NetworkManager="*res://Scripts/NetworkManager.cs"

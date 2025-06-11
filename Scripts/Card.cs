@@ -36,6 +36,9 @@ public partial class Card : Area2D
 
     [Export] public int Number = -1;
 
+    // A deterministic identifier used for multiplayer synchronization.
+    public string Id { get; set; }
+
     private StyleBoxFlat _originalStyleBox;
 
     // [Export] public bool IsInDeck = false;
