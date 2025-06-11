@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using GodotHelper;
 
@@ -19,46 +18,30 @@ public enum GameState
 public partial class GameStateMachine : Node
 {
     private GameManager _gameManager;
+    private readonly Dictionary<GameState, BaseGameState> _states = new();
+    private BaseGameState _currentState;
 
     public GameState CurrentState { get; private set; }
 
     public override void _Ready()
     {
-        _gameManager = GetParent<GameManager>(); // 或用依賴注入
-        // ChangeState(GameState.Init);
+        _gameManager = GetParent<GameManager>();
+        _states[GameState.Init] = new InitState(this, _gameManager);
+        _states[GameState.DealCards] = new DealCardsState(this, _gameManager);
+        _states[GameState.WaitForPlayerAction] = new WaitForPlayerActionState(this, _gameManager);
+        _states[GameState.PlayerPlayCard] = new PlayerPlayCardState(this, _gameManager);
+        _states[GameState.ResolveEffect] = new ResolveEffectState(this, _gameManager);
+        _states[GameState.CheckWinOrNextTurn] = new CheckWinOrNextTurnState(this, _gameManager);
+        _states[GameState.GameOver] = new GameOverState(this, _gameManager);
     }
 
-    public async void ChangeState(GameState newState)
+    public async Task ChangeState(GameState newState)
     {
         GD.Print($"狀態變化: {CurrentState} ➡ {newState}");
+        _currentState?.ExitState();
         CurrentState = newState;
-
-        switch (newState)
-        {
-            case GameState.Init:
-                InitDeck();
-                ShuffleDeck(_gameManager.Deck);
-                DisplayDeckPile();
-                break;
-
-            case GameState.DealCards:
-                await _gameManager.DealBeginCard();
-                await _gameManager.InitPlayerAndUIAsync();
-                ChangeState(GameState.WaitForPlayerAction);
-                break;
-
-            case GameState.WaitForPlayerAction:
-                _gameManager.SetCurrentPlayerHandActive();
-                break;
-
-            case GameState.ResolveEffect:
-                // 可依據卡片類型做不同效果
-                break;
-
-            case GameState.CheckWinOrNextTurn:
-                // 檢查是否有人沒牌，否則下一位
-                break;
-        }
+        _currentState = _states[newState];
+        await _currentState.EnterState();
     }
 
     public void InitDeck()
@@ -105,13 +88,13 @@ public partial class GameStateMachine : Node
         int count = Math.Min(_gameManager.Deck.Count, MaxStackSize);
         for (int i = 0; i < count; i++)
         {
-            Card visualCard = _gameManager.CreateCard($"deck", CardColor.Wild, CardType.Wild); // 顯示用，不影響資料堆
-            visualCard.Position = new Vector2(0, -i * OffsetStep); // 小小位移
+            Card visualCard = _gameManager.CreateCard($"deck", CardColor.Wild, CardType.Wild);
+            visualCard.Position = new Vector2(0, -i * OffsetStep);
             visualCard.ZAsRelative = false;
             visualCard.ZIndex = i;
-            visualCard.RotationDegrees = GD.Randf() * RotationStep - (RotationStep / 2); // 微旋轉
+            visualCard.RotationDegrees = GD.Randf() * RotationStep - (RotationStep / 2);
             visualCard.IsInteractive = false;
-            visualCard.Modulate = new Color(1, 1, 1, 0.8f); // 透明度微低
+            visualCard.Modulate = new Color(1, 1, 1, 0.8f);
 
             _gameManager.DeckPileNode.AddChild(visualCard);
         }
@@ -124,7 +107,6 @@ public partial class GameStateMachine : Node
         {
             int j = random.Next(i + 1);
             (cards[i], cards[j]) = (cards[j], cards[i]);
-            // 設定階層
             cards[i].ZIndex = i;
         }
     }
@@ -136,7 +118,4 @@ public partial class GameStateMachine : Node
             offset: (i) => { return new Vector2(i * _gameManager.CardSpacing, 0); }, showAnimation: showAnimation,
             showCard: showCard);
     }
-
-
-
 }

@@ -139,9 +139,8 @@ public partial class GameManager : Node2D
     private async Task InitStateMachineAsync()
     {
         _gameStateMachine = GetNode<GameStateMachine>("GameStateMachine");
-        _gameStateMachine.ChangeState(GameState.Init);
-        _gameStateMachine.ChangeState(GameState.DealCards);
-        await Task.CompletedTask;
+        await _gameStateMachine.ChangeState(GameState.Init);
+        await _gameStateMachine.ChangeState(GameState.DealCards);
     }
 
 
