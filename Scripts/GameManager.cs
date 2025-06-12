@@ -254,7 +254,19 @@ public partial class GameManager : Node2D
 
     public async Task InitPlayerAndUIAsync(int? playerNumber = null)
     {
-        int comPlayerNumber = playerNumber ?? ComPlayerNumber;
+        int comPlayerNumber;
+        // When running a networked game each peer must create the same
+        // number of players. Count the connected peers (including the host)
+        // and use that value instead of the exported ComPlayerNumber.
+        if (Multiplayer.MultiplayerPeer != null)
+        {
+            int connected = Multiplayer.GetPeers().Count + 1;
+            comPlayerNumber = connected;
+        }
+        else
+        {
+            comPlayerNumber = playerNumber ?? ComPlayerNumber;
+        }
         // 1. 加入玩家（含本地玩家與 COM）
         Players.Clear();
         // 清空 UI 面板
