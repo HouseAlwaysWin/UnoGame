@@ -22,17 +22,17 @@ public partial class NetworkManager : Node
 
     public void HostGame()
     {
-        var peer = new ENetMultiplayerPeer();
-        peer.CreateServer(Port, MaxPlayers);
-        Multiplayer.MultiplayerPeer = peer;
+        _multiplayer = new ENetMultiplayerPeer();
+        _multiplayer.CreateServer(Port, MaxPlayers);
+        Multiplayer.MultiplayerPeer = _multiplayer;
         GD.Print($"Hosting game on port {Port}");
     }
 
     public void JoinGame(string address)
     {
-        var peer = new ENetMultiplayerPeer();
-        peer.CreateClient(address, Port);
-        Multiplayer.MultiplayerPeer = peer;
+        _multiplayer = new ENetMultiplayerPeer();
+        _multiplayer.CreateClient(address, Port);
+        Multiplayer.MultiplayerPeer = _multiplayer;
         GD.Print($"Joining {address}:{Port}");
     }
 
