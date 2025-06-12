@@ -37,6 +37,7 @@ public partial class UnoMainMenu : Control
 
     private void OnExitPressed()
     {
+        NetworkManager.Instance.LeaveGame();
         GetTree().Quit();
     }
 }
