@@ -284,8 +284,11 @@ public partial class GameManager : Node2D
             Players.Add(newPlayer);
         }
 
-        var random = new Random();
-        MyPlayer = Players[random.Next(Players.Count)];
+        // Determine the local player based on the Multiplayer peer id so that
+        // every client chooses the same index. Godot assigns peer ids starting
+        // from 1, therefore we map `peerId - 1` to the Players list.
+        var peerId = (int)Multiplayer.GetUniqueId();
+        MyPlayer = Players[(peerId - 1) % Players.Count];
         MyPlayerNameLabel.Text = MyPlayer.Name;
 
         foreach (var player in Players)
