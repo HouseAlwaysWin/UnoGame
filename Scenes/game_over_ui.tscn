@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bw6aiq4rq68ga"]
 
-[ext_resource type="Script" uid="uid://ca8y0oc7ty7vs" path="res://Scripts/GameOverUI.cs" id="1_vvx4t"]
+[ext_resource type="Script" uid="uid://d0hgwtd2ytwe1" path="res://Scripts/GameOverUI.cs" id="1_vvx4t"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7mnph"]
 bg_color = Color(0.262682, 0.620104, 0.405727, 1)
