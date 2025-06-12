@@ -252,20 +252,20 @@ public partial class GameManager : Node2D
         GD.Print($"方向翻轉：{(_isClockwise ? "順時針" : "逆時針")}");
     }
 
-    public async Task InitPlayerAndUIAsync(int? playerNumber = null)
+    public async Task InitPlayerAndUIAsync()
     {
         int comPlayerNumber;
         // When running a networked game each peer must create the same
         // number of players. Count the connected peers (including the host)
         // and use that value instead of the exported ComPlayerNumber.
-        if (Multiplayer.MultiplayerPeer != null)
+        if (Multiplayer.MultiplayerPeer != null && Multiplayer.GetPeers().Length > 0)
         {
-            int connected = Multiplayer.GetPeers().Count + 1;
+            int connected = Multiplayer.GetPeers().Length + 1;
             comPlayerNumber = connected;
         }
         else
         {
-            comPlayerNumber = playerNumber ?? ComPlayerNumber;
+            comPlayerNumber = ComPlayerNumber;
         }
         // 1. 加入玩家（含本地玩家與 COM）
         Players.Clear();
