@@ -36,6 +36,17 @@ public partial class NetworkManager : Node
         GD.Print($"Joining {address}:{Port}");
     }
 
+    public void LeaveGame()
+    {
+        if (_multiplayer != null)
+        {
+            _multiplayer.Close();
+            Multiplayer.MultiplayerPeer = null;
+            GD.Print("Left game");
+            _multiplayer = null;
+        }
+    }
+
     private void OnPeerConnected(long id)
     {
         GD.Print($"Peer connected: {id}");

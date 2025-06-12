@@ -20,6 +20,7 @@ public partial class GameOverUI : Control
         {
             // 點擊左鍵時關閉遊戲結束畫面
             GetTree().Paused = false; // 解除暫停
+            NetworkManager.Instance.LeaveGame();
             GetTree().ChangeSceneToFile("res://Scenes/uno_main_menu.tscn");
         }
     }
